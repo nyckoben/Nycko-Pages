@@ -2,7 +2,7 @@
 title: 'nycko'
 description: 'description'
 keyword: 'key, word'
-url: 'http://nycko.gitee.io' # your host
+url: 'http://nycko.github.io' # your host
 
 # if you don't need baseurl, you should leave this value blank.
 # baseurl: '/nycko-pages'

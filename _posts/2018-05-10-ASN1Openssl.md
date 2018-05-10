@@ -8,7 +8,7 @@ tags: PKI OpenSsl C++
 ---
 
 * 本文直接以实例进行说明，例子为国密SM2算法进行数字签名时的输出格式，如下：图片显示还没弄好，请跳转  
-[sm2Asn1Data.jpg](https://gitee.com/nycko/Nycko-Pages/blob/master/PagesSrc/pic/sm2Asn1Data.jpg)  
+![sm2Asn1Data.jpg](https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/sm2Asn1Data.jpg?raw=true)  
 [代码链接](https://gitee.com/nycko/Nycko-Pages/tree/master/PageSrc/ASN1OpenSsl)
 
 
