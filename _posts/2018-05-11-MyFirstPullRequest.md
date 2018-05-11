@@ -27,6 +27,6 @@ end:
 * 然后clone你自己的仓库到本地，修改代码，提交，推送到自己的仓库
 * 这时候你自己的仓库则多了一次提交，然后前往对方的仓库，点击new pull request
 * 这里根据下图操作，对比你仓库的版本和对方仓库的版本，正确处理冲突后，则可以create pull request了，剩下的则是对方的处理了，对方将选择是否接受你的提交  
-![create pull request]()  
+![create pull request](https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/pullRequest.jpg?raw=true)  
 ### 第一次被采纳还是很开心的，虽然解决的也是很简单bug，一行代码而已
-![gmssl pull request]()
+![gmssl pull request](https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/GmsslPullRequest.jpg?raw=true)
