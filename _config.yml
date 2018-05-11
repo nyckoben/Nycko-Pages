@@ -5,19 +5,13 @@ keyword: 'key, word'
 url: 'http://nycko.github.io' # your host
 
 # if you don't need baseurl, you should leave this value blank.
-# baseurl: '/nycko-pages'
-baseurl: '/'
+baseurl: ''
+
 # Navigation links
 nav:
-  home: '/nycko-pages'
-  tags: '/nycko-pages/tags.html'
+  home: ''
+  tags: '/tags.html'
   
-# baseurl: ''
-# # Navigation links
-# nav:
-#   home: '/'
-#   tags: '/tags.html'
-
 # Author 配置博主信息
 author: 'NyckoBen'
 nickname: 'Nycko'
@@ -25,7 +19,7 @@ bio: 'C/C++攻城狮 爱生活 爱折腾'
 avatar: '/assets/img/profile.png'
 
 # Search
-search: false
+search: true
 
 # Night mode
 nightMode: false
@@ -34,9 +28,11 @@ nightMode: false
 #disqus: false
 #disqus_url: 'https://liaokeyu.disqus.com/embed.js'
 
+# MathJax 公式支持 by Ray-Eldath
+mathjax: true
+
 # Share
 social-share: true
-#social-share-items: ['wechat', 'weibo', 'douban', 'twitter']
 social-share-items: ['wechat', 'weibo']
 
 # theme color 主题皮肤
@@ -45,7 +41,8 @@ theme-color: 'default'  # pink or default
 # Post header background patterns (when the post no cover): circuitBoard, overlappingCircles, food, glamorous, ticTacToe, seaOfClouds
 postPatterns: 'circuitBoard'
 
-# SNS settings 配置社交网站url: weibo, zhihu, twitter, instagram, juejin, github, douban, facebook, dribble, uicn, jianshu, medium, linkedin
+# SNS settings 配置社交网站
+# url: weibo, zhihu, twitter, instagram, juejin, github, douban, facebook, dribble, uicn, jianshu, medium, linkedin
 sns:
   weibo: '//weibo.com/nycko'
 #  juejin: '//juejin.im/user/57a6f434165abd006159b4cc'
@@ -78,9 +75,10 @@ kramdown:
 #    coderay_bold_every: 10
 #    coderay_css: style
 
+# RSS  
 RSS: false
 
 # Plugins
-gems: [jekyll-paginate]
+plugins: [jekyll-paginate]
 
 baidu-analysis: 52bc94134779e020ff4f58ad9ff1a486
