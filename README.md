@@ -1,3 +1,5 @@
+# 本人主页
+[https://nyckoben.github.io/Nycko-Pages/](https://nyckoben.github.io/Nycko-Pages/)
 # 基于
 [主题GitHub](https://github.com/kaeyleo/jekyll-theme-H2O),
 [作者主页](http://liaokeyu.com),
@@ -14,7 +16,7 @@
 
 # Bug
 本人不熟前端，都是跟着chrome调试提示的错误找到代码一点点修改的
-*  由于模板不少地方使用的url只有http://username.gitee.io/，而并没有仓库名，  
+*  由于模板不少地方使用的url只有http://username.github.io/，而并没有仓库名，  
 但其实_config.yml有定义该变量，所以在必要的地方加上了
 ```
 | prepend: site.baseurl 
