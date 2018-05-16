@@ -2,6 +2,14 @@
     "python.linting.enabled": false,
     "files.associations": {
         "xstring": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "initializer_list": "cpp",
+        "type_traits": "cpp",
+        "system_error": "cpp",
+        "xstddef": "cpp",
+        "xtr1common": "cpp",
+        "xiosbase": "cpp",
+        "xlocale": "cpp",
+        "xutility": "cpp"
     }
 }
