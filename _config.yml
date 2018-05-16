@@ -1,86 +1,93 @@
-# Site settings 配置站点
-title: 'nycko'
-description: 'description'
-keyword: 'key, word'
-url: 'http://nycko.github.io' # your host
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
 
-# if you don't need baseurl, you should leave this value blank.
-# baseurl: '/nycko-pages'
-baseurl: '/'
-# Navigation links
-nav:
-  home: '/nycko-pages'
-  tags: '/nycko-pages/tags.html'
-  
-# baseurl: ''
-# # Navigation links
-# nav:
-#   home: '/'
-#   tags: '/tags.html'
+# Site settings
+title: Yummy Theme # ex. I m Chuan
+name: Your Name # ex. DONGChuan
+email: my_email_address@lalala.com
+location: My location # ex. Nice, France
+company: MyCompany
+company_url: my_company_website
+github_url: my_github_url # ex. https://github.com/DONGChuan
+github_username: # ex. DONGChuan
+description: description_of_your_web_site
+favicon: favicon.png # Image must be in assets/images
+repository: github_username/github_username.github.io # ex. DONGChuan/DONGChuan.github.io
 
-# Author 配置博主信息
-author: 'NyckoBen'
-nickname: 'Nycko'
-bio: 'C/C++攻城狮 爱生活 爱折腾'
-avatar: '/assets/img/profile.png'
+# The base hostname & protocol for your site
+# For local test, please use http://localhost:4000
+# For production, use your github page url. ex. http://dongchuan.github.io
+url: http://localhost:4000
 
-# Search
-search: false
-
-# Night mode
-nightMode: false
-
-# Comments 评论
-#disqus: false
-#disqus_url: 'https://liaokeyu.disqus.com/embed.js'
-
-# Share
-social-share: true
-#social-share-items: ['wechat', 'weibo', 'douban', 'twitter']
-social-share-items: ['wechat', 'weibo']
-
-# theme color 主题皮肤
-theme-color: 'default'  # pink or default
-
-# Post header background patterns (when the post no cover): circuitBoard, overlappingCircles, food, glamorous, ticTacToe, seaOfClouds
-postPatterns: 'circuitBoard'
-
-# SNS settings 配置社交网站url: weibo, zhihu, twitter, instagram, juejin, github, douban, facebook, dribble, uicn, jianshu, medium, linkedin
-sns:
-  weibo: '//weibo.com/nycko'
-#  juejin: '//juejin.im/user/57a6f434165abd006159b4cc'
-#  instagram: '//www.instagram.com/steveliaocn'
-#  github: '//github.com/kaeyleo'
-
-# Tags 设置标签
-recommend-tags: true # whether or not display recommend-tags on the sidebar
-recommend-condition-size: 12 # a tag will be recommended if the size of it is more than this value
+## Gem
+gems:
+  - jekyll-paginate
+  - jekyll-geo-pattern
+  - rouge
+  - kramdown
+  - jekyll-github-metadata
 
 # Build settings
-paginate: 6
-paginate_path: 'page:num'
-exclude: ['node_modules', 'dev', 'package.json', 'gulpfile.js', '.gitignore', 'README.md']
-
-# Markdown
 markdown: kramdown
-
 highlighter: rouge
+lsi:         false
+excerpt_separator: "\n\n"
+
+source:      .
+destination: ./_site
+
+quiet:    false
+defaults: []
 
 kramdown:
   input: GFM
-#  use_coderay: true
-#  
-#  coderay:
-#    coderay_wrap: div
-#    coderay_line_numbers: inline
-#    coderay_line_numbers_start: 1
-#    coderay_tab_width: 4
-#    coderay_bold_every: 10
-#    coderay_css: style
+  enable_coderay: true
 
-RSS: false
+# Disque
+disque: my_disque_settings # ex. httpdongchuangithubio.disqus.com
 
-# Plugins
-gems: [jekyll-paginate]
+# Pagination
+paginate: 10
+paginate_path: 'page:num'
 
-baidu-analysis: 52bc94134779e020ff4f58ad9ff1a486
+# Navigation. If you do not like these modules, just remove them :D
+navs:
+  -
+    href: /
+    label: Home
+
+  -
+    href: /open-source
+    label: Open-Source
+
+  -
+    href: /blog
+    label: Blog
+
+  -
+    href: /bookmark
+    label: Bookmark
+
+  -
+    href: /about
+    label: About
+
+# Sidebar to show popular repo
+side_bar_repo_limit: 5 # Number of repos to show
+
+# Google Analytics
+analytics :
+  provider : google
+  google :
+      tracking_id : 'tracking_id'  # ex. UA-72165600-X
+
+
+# For about.html. Fell free to create your own!
+skill_software_keywords: [Java, C, C++, Qt, Python, MySQL, Oracle, SQLite, PL/SQL, Design Patterns]
+skill_j2ee_keywords: [Spring, Struct, Hibernet, MyBatis, JSP]
+skill_web_keywords: [HTML, CSS, JS, JQuery, Ajax, AngularJS, NodeJS, ExpressJS, MongoDB, Redis, PHP, Symfony, Boostrap]
+skill_mobile_app_keywords: [Android, Sketch UI Desgin]
