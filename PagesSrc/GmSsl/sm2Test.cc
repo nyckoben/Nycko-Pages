@@ -13,15 +13,18 @@ int hashForSM3(
     unsigned char* sm3Data)
 {
     int ret = -1;
+    //初始化摘要结构体
 	EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
 	if(!mdctx) 
         return -1;
-	EVP_MD_CTX_init(mdctx);//初始化摘要结构体  
+	EVP_MD_CTX_init(mdctx);  
 
-	if(!EVP_DigestInit_ex(mdctx, EVP_sm3(), NULL)) //设置摘要算法和密码算法引擎  
+    //设置摘要算法和密码算法引擎
+	if(!EVP_DigestInit_ex(mdctx, EVP_sm3(), NULL))   
         goto ERR;
-    
-	if(!EVP_DigestUpdate(mdctx,clearText, clearTextLen)) //输入原文clearText 
+
+    //输入原文clearText
+	if(!EVP_DigestUpdate(mdctx,clearText, clearTextLen))  
         goto ERR;
     
     //输出摘要值，外部判断ret是否为32作为成功条件
@@ -50,13 +53,15 @@ int hashForSM3WithSM2(
         0xBC,0x37,0x36,0xA2,0xF4,0xF6,0x77,0x9C,0x59,0xBD,0xCE,0xE3,0x6B,0x69,0x21,0x53,
         0xD0,0xA9,0x87,0x7C,0xC6,0x2A,0x47,0x40,0x02,0xDF,0x32,0xE5,0x21,0x39,0xF0,0xA0,
         };
-    memcpy(sm2_par_dig + 2 + 16 + 128, puk, pukLen);//对应规范pdf中的章节8.1
+    //对应规范pdf中的章节8.1
+    memcpy(sm2_par_dig + 2 + 16 + 128, puk, pukLen);
     unsigned char* sm3_e = new unsigned char[32 + clearTextLen];
     if(32 != hashForSM3(sm2_par_dig, 210, sm3_e)){
         delete[] sm3_e;
         return -1;
     } 
-	memcpy(sm3_e + 32, clearText, clearTextLen);//对应规范pdf中的章节8.2
+    //对应规范pdf中的章节8.2
+	memcpy(sm3_e + 32, clearText, clearTextLen);
     if(32 != hashForSM3(sm3_e, 32 + clearTextLen, sm3Data)){
         delete[] sm3_e;
         return -1;
@@ -95,7 +100,8 @@ int main(){
     pubkey = EVP_PKEY_get0_EC_KEY(pkey_puk);//don't free
     if (!pubkey) goto ERR;
 
-    pukLen = i2d_PublicKey(pkey_puk,(unsigned char**)&puk) - 1;//要去除04标识
+    //要去除04标识
+    pukLen = i2d_PublicKey(pkey_puk,(unsigned char**)&puk) - 1;
     if (!puk) goto ERR;
 
     ///////////////////////////////////私钥相关结构
