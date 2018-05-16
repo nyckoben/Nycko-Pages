@@ -1,9 +1,7 @@
-_site
 .DS_Store
-*.sublime-project
-*.sublime-workspace
-codekit-config.json
+*/.DS_Store
+
 node_modules
-Gemfile.lock
-.sass-cache
-.jekyll-metadata
+
+_site
+.vscode/Nycko-Pages.code-workspace
