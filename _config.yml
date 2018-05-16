@@ -1,86 +1,106 @@
-# Site settings 配置站点
-title: 'nycko'
-description: 'description'
-keyword: 'key, word'
-url: 'http://nycko.github.io' # your host
+title:            Blog Title
+description:      Describe your website here.
 
-# if you don't need baseurl, you should leave this value blank.
-# baseurl: '/nycko-pages'
-baseurl: '/'
-# Navigation links
-nav:
-  home: '/nycko-pages'
-  tags: '/nycko-pages/tags.html'
-  
-# baseurl: ''
-# # Navigation links
-# nav:
-#   home: '/'
-#   tags: '/tags.html'
+# put your disqus here
+disqus_shortname:
+reading_time:     true # if true, shows the estimated reading time for a post
+words_per_minute: 200
+logo:             images/logo.png # logo visible in the topbar
+excerpt_separator: <!--more-->
+# Your site's domain goes here (eg: //mmistakes.github.io, http://mademistakes.com, etc)
+# When testing locally leave blank or use http://localhost:4000
 
-# Author 配置博主信息
-author: 'NyckoBen'
-nickname: 'Nycko'
-bio: 'C/C++攻城狮 爱生活 爱折腾'
-avatar: '/assets/img/profile.png'
+url: http://aronbordin.com/neo-hpstr-jekyll-theme
 
-# Search
-search: false
+# draw your top menu here
+# each item must have a title and a url.
+#   To list post categories. use type: 'categories'
+#   To create sub categories. add a submenu item
+# See the example
+menu:
+  - title: 'Home'
+    url: '/'
+  - title: 'Fork'
+    url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme'
+  - title: 'Install'
+    url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme#installation'
+  - title: 'Tags'
+    url: '/tags'
+  - title: 'Categories'
+    url: '/categories'
+    type: 'categories'
+  - title: 'Favorites'
+    url: '#'
+    submenu:
+      - title: 'Code Highlighter'
+        url: '/intro/code-highlighting-post/'
+      - title: 'Sample Post'
+        url: '/intro/sample-post/'
 
-# Night mode
-nightMode: false
+# Owner/author information
+owner:
+  name:           Your name
+  site:           http://aronbordin.com
+  avatar:         images/avatar.jpg
+  bio:            "Your bio goes here. It shouldn't be super long but a good two sentences or two should suffice."
+  email:          you@email.com
+  # Twitter nick for use in Twitter cards and follow button.
+  twitter: aron_bordin # if no twitter in this config, the twitter follow button will be removed
+  # GitHub nick for use in follow button in author block.
+  github: aron-bordin
 
-# Comments 评论
-#disqus: false
-#disqus_url: 'https://liaokeyu.disqus.com/embed.js'
+# Twitter account associated with the site if different from owner/author twitter account.
+# Used in Twitter cards.
+twitter:
 
-# Share
-social-share: true
-#social-share-items: ['wechat', 'weibo', 'douban', 'twitter']
-social-share-items: ['wechat', 'weibo']
+# Social networking links used in author block underneath posts. Update and remove as you like.
+social:
+  - title: "github"
+    url: "https://github.com/aron-bordin"
+  - title: "linkedin"
+    url: "https://br.linkedin.com/in/aronbordin"
+  - title: "youtube"
+    url: "https://www.youtube.com/channel/UCfnSek-9HPWOx5e2pH7VFgg"
 
-# theme color 主题皮肤
-theme-color: 'default'  # pink or default
+# Background image to be tiled on all pages
+background:
 
-# Post header background patterns (when the post no cover): circuitBoard, overlappingCircles, food, glamorous, ticTacToe, seaOfClouds
-postPatterns: 'circuitBoard'
+# Analytics and webmaster tools stuff goes here
+google_analytics:
+google_verify:
+# https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
+bing_verify:
 
-# SNS settings 配置社交网站url: weibo, zhihu, twitter, instagram, juejin, github, douban, facebook, dribble, uicn, jianshu, medium, linkedin
-sns:
-  weibo: '//weibo.com/nycko'
-#  juejin: '//juejin.im/user/57a6f434165abd006159b4cc'
-#  instagram: '//www.instagram.com/steveliaocn'
-#  github: '//github.com/kaeyleo'
-
-# Tags 设置标签
-recommend-tags: true # whether or not display recommend-tags on the sidebar
-recommend-condition-size: 12 # a tag will be recommended if the size of it is more than this value
-
-# Build settings
-paginate: 6
-paginate_path: 'page:num'
-exclude: ['node_modules', 'dev', 'package.json', 'gulpfile.js', '.gitignore', 'README.md']
-
-# Markdown
-markdown: kramdown
-
+# http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone:    America/New_York
+locale:      en_US
+future:      true
 highlighter: rouge
+markdown:    kramdown
+sass:
+  sass_dir: _sass
+  style: compressed
 
-kramdown:
-  input: GFM
-#  use_coderay: true
-#  
-#  coderay:
-#    coderay_wrap: div
-#    coderay_line_numbers: inline
-#    coderay_line_numbers_start: 1
-#    coderay_tab_width: 4
-#    coderay_bold_every: 10
-#    coderay_css: style
+# https://github.com/mojombo/jekyll/wiki/Permalinks
+permalink:   /:categories/:title/
 
-RSS: false
+# Amount of post to show on home page
+paginate: 5
 
-# Plugins
+# if true, shows the floatting share buttons
+float_share: true
+
+# Octopress
+# Default extensions
+post_ext: md
+page_ext: md
+# Found in _templates/
+post_layout: post
+page_layout: page
+# Format titles with titlecase?
+titlecase: true
+
+include: [".htaccess"]
+exclude: ["demo/*", "lib", "config.rb", "Capfile", "config", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules"]
 gems: [jekyll-paginate]
-
-baidu-analysis: 52bc94134779e020ff4f58ad9ff1a486
+theme: neo-hpstr-jekyll-theme

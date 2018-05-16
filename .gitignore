@@ -1,7 +1,9 @@
-.DS_Store
-*/.DS_Store
-
-node_modules
-
 _site
-.vscode/Nycko-Pages.code-workspace
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+codekit-config.json
+node_modules
+Gemfile.lock
+.sass-cache
+*.gem
