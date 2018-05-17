@@ -1,5 +1,5 @@
 //编译命令,注意ssl指gmssl的动态库
-//g++ -g -o test sm2Test.cc -lssl
+//g++ -o test sm2Test.cc -lssl
 
 #include <string.h>
 #include <openssl/evp.h>
