@@ -87,8 +87,8 @@ permalink:   /:categories/:title/
 # Amount of post to show on home page
 paginate: 5
 
-# if true, shows the floatting share buttons左边浮动分享按钮
-float_share: fault
+# if true, shows the floatting share buttons
+float_share: true
 
 # Octopress
 # Default extensions
