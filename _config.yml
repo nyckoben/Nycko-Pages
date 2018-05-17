@@ -42,7 +42,7 @@ owner:
   name:           Nycko
   site:           https://github.com/nyckoben/Nycko-Pages
   avatar:         images/avatar.jpg
-  bio:            "C/C++攻城狮 爱生活 爱折腾."
+  bio:            "C/C++攻城狮 爱生活 爱折腾"
   email:          nycko@sina.com
   # Twitter nick for use in Twitter cards and follow button.
   # twitter: aron_bordin # if no twitter in this config, the twitter follow button will be removed
