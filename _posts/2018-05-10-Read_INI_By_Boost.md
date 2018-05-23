@@ -26,6 +26,8 @@ Test.cpp
 void func(){
     boost::property_tree::ptree pt;        
     boost::property_tree::ini_parser::read_ini("./Test.ini", pt);
-    char *ipStr = pt.get<std::string>("SERVER.IpAddr").c_str();
+    //在windows上vs编译后出现ipStr为乱码，原因未知，改用string即可正常处理
+    //char *ipStr = pt.get<std::string>("SERVER.IpAddr").c_str();
+    std::string ip = pt.get<std::string>("SERVER.IpAddr");
 }
 ```
