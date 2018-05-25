@@ -1,5 +1,5 @@
-title:            nycko
-description:      I'm Nycko
+title:            Blog Title
+description:      Describe your website here.
 
 # put your disqus here
 disqus_shortname:
@@ -10,7 +10,7 @@ excerpt_separator: <!--more-->
 # Your site's domain goes here (eg: //mmistakes.github.io, http://mademistakes.com, etc)
 # When testing locally leave blank or use http://localhost:4000
 
-url: https://nyckoben.github.io/Nycko-Pages
+url: http://aronbordin.com/neo-hpstr-jekyll-theme
 
 # draw your top menu here
 # each item must have a title and a url.
@@ -20,34 +20,34 @@ url: https://nyckoben.github.io/Nycko-Pages
 menu:
   - title: 'Home'
     url: '/'
-  # - title: 'Fork'
-  #   url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme'
-  # - title: 'Install'
-  #   url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme#installation'
+  - title: 'Fork'
+    url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme'
+  - title: 'Install'
+    url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme#installation'
   - title: 'Tags'
     url: '/tags'
   - title: 'Categories'
     url: '/categories'
     type: 'categories'
-  # - title: 'Favorites'
-  #   url: '#'
-    # submenu:
-    #   - title: 'Code Highlighter'
-    #     url: '/intro/code-highlighting-post/'
-    #   - title: 'Sample Post'
-    #     url: '/intro/sample-post/'
+  - title: 'Favorites'
+    url: '#'
+    submenu:
+      - title: 'Code Highlighter'
+        url: '/intro/code-highlighting-post/'
+      - title: 'Sample Post'
+        url: '/intro/sample-post/'
 
 # Owner/author information
 owner:
-  name:           Nycko
-  site:           https://github.com/nyckoben/Nycko-Pages
+  name:           Your name
+  site:           http://aronbordin.com
   avatar:         images/avatar.jpg
-  bio:            "C/C++攻城狮 爱生活 爱折腾"
-  email:          nycko@sina.com
+  bio:            "Your bio goes here. It shouldn't be super long but a good two sentences or two should suffice."
+  email:          you@email.com
   # Twitter nick for use in Twitter cards and follow button.
-  # twitter: aron_bordin # if no twitter in this config, the twitter follow button will be removed
+  twitter: aron_bordin # if no twitter in this config, the twitter follow button will be removed
   # GitHub nick for use in follow button in author block.
-  github: https://github.com/nyckoben/
+  github: aron-bordin
 
 # Twitter account associated with the site if different from owner/author twitter account.
 # Used in Twitter cards.
@@ -56,11 +56,11 @@ twitter:
 # Social networking links used in author block underneath posts. Update and remove as you like.
 social:
   - title: "github"
-    url: "https://github.com/nyckoben/"
-  # - title: "linkedin"
-  #   url: "https://br.linkedin.com/in/aronbordin"
-  # - title: "youtube"
-  #   url: "https://www.youtube.com/channel/UCfnSek-9HPWOx5e2pH7VFgg"
+    url: "https://github.com/aron-bordin"
+  - title: "linkedin"
+    url: "https://br.linkedin.com/in/aronbordin"
+  - title: "youtube"
+    url: "https://www.youtube.com/channel/UCfnSek-9HPWOx5e2pH7VFgg"
 
 # Background image to be tiled on all pages
 background:
@@ -88,7 +88,7 @@ permalink:   /:categories/:title/
 paginate: 5
 
 # if true, shows the floatting share buttons
-float_share: 
+float_share: true
 
 # Octopress
 # Default extensions
@@ -101,6 +101,6 @@ page_layout: page
 titlecase: true
 
 include: [".htaccess"]
-exclude: ["demo/*", "lib", "config.rb", "Capfile", "config", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules"]
+exclude: ["lib", "config.rb", "Capfile", "config", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules"]
 gems: [jekyll-paginate]
 theme: neo-hpstr-jekyll-theme

@@ -1,109 +1,248 @@
-# The Leap day theme
+# [Neo-HPSTR Jekyll Theme](http://aronbordin.com/neo-hpstr-jekyll-theme)
+[![Gem Version](https://badge.fury.io/rb/neo-hpstr-jekyll-theme.svg)](https://badge.fury.io/rb/neo-hpstr-jekyll-theme)
 
-[![Build Status](https://travis-ci.org/pages-themes/leap-day.svg?branch=master)](https://travis-ci.org/pages-themes/leap-day) [![Gem Version](https://badge.fury.io/rb/jekyll-theme-leap-day.svg)](https://badge.fury.io/rb/jekyll-theme-leap-day)
+Neo-HPSTR Jekyll is a responsive and modern blog template.
 
-*Leap day is a Jekyll theme for GitHub Pages. You can [preview the theme to see what it looks like](http://pages-themes.github.io/leap-day), or even [use it today](#usage).*
+![Preview](http://aron-bordin.github.io/neo-hpstr-jekyll-theme/images/neo-hpstr-jekyll-theme-preview.png)
 
-![Thumbnail of Leap day](thumbnail.png)
+Demo: http://aronbordin.com/neo-hpstr-jekyll-theme
 
-## Usage
 
-To use the Leap day theme:
+## Contents
 
-1. Add the following to your site's `_config.yml`:
+- [Installation](#installation)
+- [Features](#features)
+- [Configuration](#configuration)
+- [Questions](#questions)
+- [Contributing](#contributing)
+- [Development](#development)
+- [License](#license)
 
-    ```yml
-    theme: jekyll-theme-leap-day
-    ```
+## Installation
 
-2. Optionally, if you'd like to preview your site on your computer, add the following to your site's `Gemfile`:
+### As a Boilerplate / Fork
 
-    ```ruby
-    gem "github-pages", group: :jekyll_plugins
-    ```
+1. [Fork the repo](https://github.com/aron-bordin/neo-hpstr-jekyll-theme)
+2. Clone down the repo with `$ git clone git@github.com:username/reponame.git`
+3. Delete the `demo/` folder and `screenshot.png` files
+4. Install bundler with `$ gem install bundler`
+5. Install gems with `$ bundle install`
+6. Run Jekyll with `$ bundle exec jekyll serve --watch`
+7. Begin hacking for your project
 
-## Customizing
+(If you are serving your blog at github, make sure to enale the gh-pages at yout repo settings)
 
-### Configuration variables
+### As a Jekyll >= 3.3 theme gem
 
-Leap day will respect the following variables, if set in your site's `_config.yml`:
+If you already have a jekyll project, jump to the instructions bellow. Otherwise, follow these steps:
 
-```yml
-title: [The title of your site]
-description: [A short description of your site's purpose]
-```
+1. Install jekyll and bundler with `$ gem install jekyll bundler`.
+2. Create your website `jekyll new my-awesome-blog`.
+3. `cd my-awesome-blog`
 
-Additionally, you may choose to set the following optional variables:
+Inside the project folder, install the theme as follows:
 
-```yml
-show_downloads: ["true" or "false" to indicate whether to provide a download URL]
-google_analytics: [Your Google Analytics tracking ID]
-```
+1. Download the starter `/demo` content, [quick download link](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/aron-bordin/neo-hpstr-jekyll-theme/tree/master/demo) and extract the content to the blog folter.
+2. Install bundler with `$ gem install bundler`
+3. Install gems with `$ bundle install`
+4. Run Jekyll with `$ bundle exec jekyll serve --watch`
+5. Begin hacking for your project
 
-### Stylesheet
 
-If you'd like to add your own custom styles:
+### Boilerplate & Theme differences
 
-1. Create a file called `/assets/css/style.scss` in your site
-2. Add the following content to the top of the file, exactly as shown:
-    ```scss
-    ---
-    ---
+The boilerplate kit is better for more drastic hacking and changes, a project that's quite different to any other and needs a lot of custom work done. Additionally you'll only be able to use this method if you want to host it on GitHub Pages, as [themes can't be submitted](https://pages.github.com/themes/)... yet.
 
-    @import "{{ site.theme }}";
-    ```
-3. Add any custom CSS (or Sass, including imports) you'd like immediately after the `@import` line
+Using the theme will allow you to receive updates made and will be more programmatic. To make your own changes you'll need to overwrite the files with your own.
 
-*Note: If you'd like to change the theme's Sass variables, you must set new values before the `@import` line in your stylesheet.*
+## Features
 
-### Layouts
+* Modern design.
+* Responsive templates for post, page, and home `_layouts`. Looks great on mobile, tablet, and desktop devices.
+* Gracefully degrades in older browsers. Compatible with Internet Explorer 8+ and all modern browsers.
+* Sweet topbar animated menu with support for drop-downs.
+* Optional [Disqus](http://disqus.com) comments and social sharing links.
+* [Open Graph](https://developers.facebook.com/docs/opengraph/) and [Twitter Cards](https://dev.twitter.com/docs/cards) support for a better social sharing experience.
+* Simple [custom 404 page](x) to get you started.
+* [Syntax highlighting](x) to make your code examples look snazzy
+* Author panel, with social links
 
-If you'd like to change the theme's HTML layout:
+## Configuration
 
-1. [Copy the original template](https://github.com/pages-themes/leap-day/blob/master/_layouts/default.html) from the theme's repository<br />(*Pro-tip: click "raw" to make copying easier*)
-2. Create a file called `/_layouts/default.html` in your site
-3. Paste the default layout content copied in the first step
-4. Customize the layout as you'd like
+Here are some tips on how to customize your blog theme. If you have questions, just open a new issue :)
 
-### Overriding GitHub-generated URLs
+### Project tree
 
-Templates often rely on URLs supplied by GitHub such as links to your repository or links to download your project. If you'd like to override one or more default URLs:
+    ├── about.md                    # about page, /about/
+    ├── assets/                     # css, js, fonts, etc
+    ├── categories.html
+    ├── _config.yml                 # your blog configuration
+    ├── demo/                       # folder with quick start content
+    ├── feed.xml                    # rss feed generator
+    ├── Gemfile                     # project dependencies
+    ├── Gruntfile.js                # some grunt tasks, useful for theme developing
+    ├── images/                     # blog images
+    ├── _includes
+    │   ├── author.html             # author banner (at the end of post)
+    │   ├── browser-upgrade.html    # ask for update
+    │   ├── disqus_comments.html    # comments
+    │   ├── feed-footer.html        # feed footers
+    │   ├── footer.html             # page footer
+    │   ├── gallery                 # used for displaying images in a page
+    │   ├── header.html             # header menu
+    │   ├── head.html               # site head, with css includes and metadata
+    │   ├── icons.html              # site icons
+    │   ├── pagination.html         # pagination
+    │   ├── read-more.html          # read-more banner, to recommend posts
+    │   ├── scripts.html            # js scripts
+    │   └── social-share.html       # floating social share integration
+    ├── index.html                  # homepage
+    ├── _layouts                    # blog layouts
+    │   ├── dark-post.html
+    │   ├── home.html
+    │   ├── page.html
+    │   └── post.html
+    ├── LICENSE.txt
+    ├── neo-hpstr-jekyll-theme.gemspec
+    ├── package.json
+    ├── _posts                     # sample posts
+    │   ├── 2016-11-26-sample-post-images.md
+    │   ├── 2016-11-27-video-post.md
+    │   ├── 2016-11-28-sample-link-post.md
+    │   ├── 2016-11-29-background-image.md
+    │   ├── 2016-11-30-dark-post.md
+    │   ├── 2016-12-01-code-highlighting-post.md
+    │   └── 2016-12-02-sample-post.md
+    ├── posts.html                 # page for listing posts
+    ├── README.md
+    ├── _sass                      # blog style
+    ├── screenshoot.png
+    ├── search.html                # search page
+    ├── search.json
+    ├── _site/
+    ├── tags.html                  # tags page
 
-1. Look at [the template source](https://github.com/pages-themes/leap-day/blob/master/_layouts/default.html) to determine the name of the variable. It will be in the form of `{{ site.github.zip_url }}`.
-2. Specify the URL that you'd like the template to use in your site's `_config.yml`. For example, if the variable was `site.github.url`, you'd add the following:
-    ```yml
-    github:
-      zip_url: http://example.com/download.zip
-      another_url: another value
-    ```
-3. When your site is built, Jekyll will use the URL you specified, rather than the default one provided by GitHub.
 
-*Note: You must remove the `site.` prefix, and each variable name (after the `github.`) should be indent with two space below `github:`.*
+### Disqus Comments
 
-For more information, see [the Jekyll variables documentation](https://jekyllrb.com/docs/variables/).
+Create a [Disqus](http://disqus.com) account and change `disqus_shortname` in `_config.yml` to the Disqus *shortname* you just setup. By default comments appear on all post and pages if you assigned a shortname. To disable commenting on a post or page, add the following to its YAML Front Matter:
 
-## Roadmap
+    comments: false
 
-See the [open issues](https://github.com/pages-themes/leap-day/issues) for a list of proposed features (and known issues).
+### Social Share Links
 
-## Project philosophy
+To disable Facebook, Twitter, and Google+ share links on a post or page, add the following to its front matter:
 
-The Leap day theme is intended to make it quick and easy for GitHub Pages users to create their first (or 100th) website. The theme should meet the vast majority of users' needs out of the box, erring on the side of simplicity rather than flexibility, and provide users the opportunity to opt-in to additional complexity if they have specific needs or wish to further customize their experience (such as adding custom CSS or modifying the default layout). It should also look great, but that goes without saying.
+    share: false
+
+### Floating Social Share Links
+
+To enable floating share links on the left of the screen, edit it on `_config.yml`:
+
+    float_share: true
+
+### Owner/Author Information
+
+Change your name, and avatar photo (200x200 pixels or larger), email, and social networking URLs. If you want to link to an external image on Gravatar or something similar you'll need to edit the path in `_includes/author.html` since it assumes it is hosted on your site.
+
+### Google Analytics and Webmaster Tools
+
+Your Google Analytics ID goes here along with meta tags for [Google Webmaster Tools](http://support.google.com/webmasters/bin/answer.py?hl=en&answer=35179) and [Bing Webmaster Tools](https://ssl.bing.com/webmaster/configure/verify/ownershi) site verification.
+
+### Top Menu - Navigation Links
+
+To add additional links in the menu edit `_config.yml`. Use the following format to set the URL and title for as many links as you'd like. *External links will open in a new window..* You can create a sub-category using the `submenu` item. Also, you can list your post categories setting the `type: 'categories'`
+
+
+    menu:
+      - title: 'Home'
+        url: '/'
+      - title: 'Fork'
+        url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme'
+      - title: 'Tags'
+        url: '/tags'
+      - title: 'Categories'
+        url: '/categories'
+        type: 'categories'
+      - title: 'Favorites'
+        url: '#'
+        submenu:
+          - title: 'highlighter'
+            url: '/code-highlighting-post/'
+          - title: 'intro'
+            url: '/sample-post/'
+
+### Adding New Content with Octopress
+
+While completely optional, I've included Octopress and some starter templates to automate the creation of new posts and pages. To take advantage of it start by installing the [Octopress](https://github.com/octopress/octopress) gem if it isn't already.
+
+    $ gem install octopress
+
+#### New Post
+
+Default command
+
+    $ octopress new post "Post Title"
+
+Default works great if you want all your posts in one directory, but if you're like me and want to group them into subfolders like `/posts`, `/portfolio`, etc. Then this is the command for you. By specifying the DIR it will create a new post in that folder and populate the `categories:` YAML with the same value.
+
+    $ octopress new post "New Portfolio Post Title" --dir portfolio
+
+#### New Page
+
+To create a new page use the following command.
+
+    $ octopress new page new-page/
+
+### Style Customization
+
+Here you'll find some useful scss variables to help you to customize your Blog interface. All variables can be found at `_sass/_variables.scss`.
+
+#### Top Navbar Size
+
+To change its size, edit the **`$menu-height`** value. It's recommended a value between 50px and 100px. This variable will automatically update the icon and menu size for you.
+
+#### Top Navbar Colors
+
+The navbar uses two colors, the top color and overflow color. The top color represents the navbar color when the window is not scrolled and the overflow color represents the color when we have a sufficient scroll to change its color.
+
+You can change these colors using the **`$menu-top`** and **`$menu-overflow`** variable values.
+
+#### Top Navbar hover color
+
+The color that you see in the item under the mouse can be changed in the **`$header-margin`** variable.
+
+### Further Customization
+
+Jekyll 2.x added support for Sass files making it much easier to modify a theme's fonts and colors. By editing values found in `_sass/variables.scss` you can fine tune the site's colors and typography.
+
+For example if you wanted a red background instead of white you'd change `$bodycolor: #fff;` to `$bodycolor: $cc0033;`.
+
+To modify the site's JavaScript files I setup a Grunt build script to lint/concatenate/minify all scripts into `scripts.min.js`. [Install Node.js](http://nodejs.org/), then [install Grunt](http://gruntjs.com/getting-started), and then finally install the dependencies for the theme contained in `package.json`:
+
+    npm install
+
+From the theme's root, use `grunt` to concatenate JavaScript files and optimize `.jpg`, `.png` and `.svg` files in the `images/` folder.
+
+You can also use `grunt dev` in combination with `bundle exec jekyll serve` to watch for updates in JS files that Grunt will then automatically re-build as you write your code, which will in turn auto-generate your Jekyll site when developing locally.
+
+## Questions?
+
+Having a problem getting something to work or want to know why I setup something in a certain way?  [File a GitHub Issue](http://github.com/aron-bordin/neo-hpstr-jekyll-theme/issues/new). And if you make something cool with this theme feel free to let me know.
 
 ## Contributing
 
-Interested in contributing to Leap day? We'd love your help. Leap day is an open source project, built one contribution at a time by users like you. See [the CONTRIBUTING file](docs/CONTRIBUTING.md) for instructions on how to contribute.
 
-### Previewing the theme locally
+Bug reports and pull requests are welcome on GitHub at https://github.com/aron-bordin/neo-hpstr-jekyll-theme. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
-If you'd like to preview the theme locally (for example, in the process of proposing a change):
+## Development
 
-1. Clone down the theme's repository (`git clone https://github.com/pages-themes/leap-day`)
-2. `cd` into the theme's directory
-3. Run `script/bootstrap` to install the necessary dependencies
-4. Run `bundle exec jekyll serve` to start the preview server
-5. Visit [`localhost:4000`](http://localhost:4000) in your browser to preview the theme
+To set up your environment to develop this theme, run `bundle install`.
 
-### Running tests
+Your theme is setup just like a normal Jekyll site! To test your theme, run `bundle exec jekyll serve` and open your browser at `http://localhost:4000`. This starts a Jekyll server using your theme. Add pages, documents, data, etc. like normal to test your theme's contents. As you make modifications to your theme and to your content, your site will regenerate and you should see the changes in the browser after a refresh, just like normal.
 
-The theme contains a minimal test suite, to ensure a site with the theme would build successfully. To run the tests, simply run `script/cibuild`. You'll need to run `script/bootstrap` one before the test script will work.
+When your theme is released, only the files in `_layouts`, `_includes`, and `_sass` tracked with Git will be released.
+
+## License
+
+The theme is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
