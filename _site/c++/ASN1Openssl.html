@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/ASN1Openssl.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>ASN.1编码的OpenSsl实现</title>
+  <meta name="description" content="  本文直接以实例进行说明，例子为国密SM2算法进行数字签名时的输出格式，如下：图片显示还没弄好，请跳转代码链接">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">ASN.1编码的OpenSsl实现</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="10 May 2018" itemprop="datePublished">May 10 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">PKI</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">OpenSsl</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>ASN.1规则利用OpenSsl提供的实现进行编码与解码</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <ul>
+  <li>本文直接以实例进行说明，例子为国密SM2算法进行数字签名时的输出格式，如下：图片显示还没弄好，请跳转<br />
+<img src="https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/sm2Asn1Data.jpg?raw=true" alt="sm2Asn1Data.jpg" /><br />
+<a href="https://gitee.com/nycko/Nycko-Pages/tree/master/PageSrc/ASN1OpenSsl">代码链接</a></li>
+</ul>
+
+<h1 id="openssl提供的用于处理asn1的宏">OpenSsl提供的用于处理ASN1的宏</h1>
+<ul>
+  <li>ASN1_SEQUENCE 定义一个最外层是SEQUENCE类型的ASN1数据类型</li>
+  <li>DECLARE_ASN1_FUNCTIONS 声明指定ASN1数据类型对应的函数</li>
+  <li>IMPLEMENT_ASN1_FUNCTIONS 定义指定ASN1数据类型对应的函数</li>
+  <li>以上宏主要实现i2d和d2i的OpenSsl类型到数据的转换，另外需要自己实现构造/析构/GET/SET等函数</li>
+</ul>
+
+<p>Example：<br />
+OpenSslAsn1.h:</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#pragma once
+#include &lt;openssl/bn.h&gt;
+#include &lt;openssl/asn1.h&gt;
+#include &lt;openssl/asn1t.h&gt;
+#include &lt;openssl/objects.h&gt;
+</span><span class="k">struct</span> <span class="n">Sm2Signature_Hander</span>
+<span class="p">{</span>
+	<span class="n">BIGNUM</span><span class="o">*</span> <span class="n">x</span><span class="p">;</span>
+	<span class="n">BIGNUM</span><span class="o">*</span> <span class="n">y</span><span class="p">;</span>
+	<span class="n">Sm2Signature_Hander</span><span class="p">();</span>
+	<span class="n">Sm2Signature_Hander</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span> <span class="o">*</span><span class="n">s1</span><span class="p">);</span>
+	<span class="k">virtual</span> <span class="o">~</span><span class="n">Sm2Signature_Hander</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">setX</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
+	<span class="kt">void</span> <span class="n">setY</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="n">getX</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="n">getY</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="n">DECLARE_ASN1_FUNCTIONS</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span><span class="p">);</span>
+<span class="cm">/* 
+DECLARE_ASN1_FUNCTIONS展开如下
+Sm2Signature_Hander *Sm2Signature_Hander_new(void);//新构造这么一个类
+void Sm2Signature_Hander_free(Sm2Signature_Hander *a); //释放
+Sm2Signature_Hander *d2i_Sm2Signature_Hander(Sm2Signature_Hander **a, 
+    const unsigned char **in, long len);//把in里的数据转换成该类
+int i2d_Sm2Signature_Hander(Sm2Signature_Hander *a, 
+    unsigned char **out);//把该类转换成数据
+const ASN1_ITEM * Sm2Signature_Hander_it(void);//iterator 迭代器
+*/</span>
+</code></pre></div></div>
+<p>OpenSslAsn1.c</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include "OpenSslAsn1.h"
+</span><span class="c1">//</span>
+<span class="n">Sm2Signature_Hander</span><span class="o">::</span><span class="n">Sm2Signature_Hander</span><span class="p">(){</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">BN_new</span><span class="p">();</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">BN_new</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="n">Sm2Signature_Hander</span><span class="o">::~</span><span class="n">Sm2Signature_Hander</span><span class="p">(){</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="n">BN_free</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="n">BN_free</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="n">Sm2Signature_Hander</span><span class="o">::</span><span class="n">setX</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">)</span>
+<span class="p">{</span> <span class="n">BN_bin2bn</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">x</span><span class="p">);</span> <span class="p">}</span>
+<span class="kt">void</span> <span class="n">Sm2Signature_Hander</span><span class="o">::</span><span class="n">setY</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">len</span><span class="p">)</span>
+<span class="p">{</span> <span class="n">BN_bin2bn</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span> <span class="p">}</span>
+<span class="kt">int</span> <span class="n">Sm2Signature_Hander</span><span class="o">::</span><span class="n">getX</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span> <span class="k">return</span> <span class="n">BN_bn2bin</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span> <span class="p">}</span>
+<span class="kt">int</span> <span class="n">Sm2Signature_Hander</span><span class="o">::</span><span class="n">getY</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span> <span class="k">return</span> <span class="n">BN_bn2bin</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span> <span class="p">}</span>
+<span class="n">ASN1_SEQUENCE</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span><span class="p">)</span> <span class="o">=</span><span class="p">{</span>
+	<span class="n">ASN1_SIMPLE</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">BIGNUM</span><span class="p">),</span>
+	<span class="n">ASN1_SIMPLE</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">BIGNUM</span><span class="p">),</span>
+<span class="p">}</span> <span class="n">ASN1_SEQUENCE_END</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span><span class="p">)</span>
+<span class="n">IMPLEMENT_ASN1_FUNCTIONS</span><span class="p">(</span><span class="n">Sm2Signature_Hander</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>以上代码则定义了一套函数用于编码以及解析“国密SM2算法进行数字签名时的输出格式”的ASN.1数据<br />
+可以如下使用：</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//把x，y的数据按照Sm2Signature_Hander数据结构定义的ASN.1格式编码到缓冲区out中。</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">x</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">y</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+<span class="n">Sm2Signature_Hander</span> <span class="o">*</span> <span class="n">sm2Sign</span> <span class="o">=</span> <span class="n">Sm2Signature_Hander_new</span><span class="p">();</span>
+<span class="n">sm2Sign</span><span class="o">-&gt;</span><span class="n">setX</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">32</span><span class="p">);</span>
+<span class="n">sm2Sign</span><span class="o">-&gt;</span><span class="n">setY</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">32</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">out</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">out</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">outLen</span> <span class="o">=</span> <span class="n">i2d_Sm2Signature_Hander</span><span class="p">(</span><span class="n">sm2Sign</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p</span><span class="p">);</span>
+<span class="n">Sm2Signature_Hander_free</span><span class="p">(</span><span class="n">sm2Sign</span><span class="p">);</span>
+
+<span class="c1">//从ASN.1数据中解码出原始数据</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">p1</span> <span class="o">=</span> <span class="n">out</span><span class="p">;</span>
+<span class="n">Sm2Signature_Hander</span> <span class="o">*</span><span class="n">sm2Sign1</span> <span class="o">=</span> 
+    <span class="n">d2i_Sm2Signature_Hander</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">p1</span><span class="p">,</span> <span class="n">outLen</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">xLen</span> <span class="o">=</span> <span class="n">sm2Sign</span><span class="o">-&gt;</span><span class="n">getX</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
+<span class="kt">int</span> <span class="n">yLen</span> <span class="o">=</span> <span class="n">sm2Sign</span><span class="o">-&gt;</span><span class="n">getY</span><span class="p">(</span><span class="n">y</span><span class="p">);</span>
+</code></pre></div></div>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=ASN.1编码的OpenSsl实现@&amp;url=http://localhost:4000/nycko-pages/c++/ASN1Openssl.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/ASN1Openssl.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/ASN1Openssl.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

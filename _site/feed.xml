@@ -1,0 +1,1325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nycko Blog</title>
+    <description>A Simple Jekyll Blog Theme. # this means to ignore newlines until &quot;baseurl:&quot;
+</description>
+    <link>http://localhost:4000/nycko-pages/</link>
+    <atom:link href="http://localhost:4000/nycko-pages/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Fri, 31 May 2019 00:53:04 +0800</pubDate>
+    <lastBuildDate>Fri, 31 May 2019 00:53:04 +0800</lastBuildDate>
+    <generator>Jekyll v3.8.5</generator>
+    
+      <item>
+        <title>Mysql学习笔记</title>
+        <description>&lt;p&gt;根据&lt;a href=&quot;https://blog.csdn.net/qq_35246620/article/details/70823903&quot;&gt;史上最简单的 MySQL 教程&lt;/a&gt;学习MySQL，在此摘录自己的笔记&lt;/p&gt;
+
+&lt;h1 id=&quot;安装centos7&quot;&gt;安装(centos7)&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;wget http://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm&lt;/li&gt;
+  &lt;li&gt;yum localinstall mysql57-community-release-el7-9.noarch.rpm&lt;/li&gt;
+  &lt;li&gt;yum install mysql-community-server&lt;/li&gt;
+  &lt;li&gt;service mysqld start&lt;/li&gt;
+  &lt;li&gt;修改临时密码&lt;br /&gt;
+为了加强安全性，MySQL5.7为root用户随机生成了一个密码，在error log中，关于error log的位置，如果安装的是RPM包，则默认是/var/log/mysqld.log，只有启动过一次mysql才可以查看临时密码：&lt;br /&gt;
+grep ‘temporary password’ /var/log/mysqld.log&lt;br /&gt;
+复制对应字段&lt;/li&gt;
+  &lt;li&gt;mysql -u root -p&lt;br /&gt;
+然后粘贴刚才的密码&lt;/li&gt;
+  &lt;li&gt;马上修改密码：&lt;br /&gt;
+ALTER USER ‘root’@’localhost’ IDENTIFIED BY ‘newpasswd’;&lt;/li&gt;
+  &lt;li&gt;如果新密码太简单，修改安全强度和长度，再重新执行上一行命令&lt;br /&gt;
+mysql&amp;gt; set global validate_password_policy=0;&lt;br /&gt;
+mysql&amp;gt; set global validate_password_length=1;&lt;/li&gt;
+  &lt;li&gt;最基础的sql安装到此结束&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;概念&quot;&gt;概念&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;一般来说，将 MySQL 数据库服务器的内部对象分为四层，分别为：数据管理系统（DBMS）–&amp;gt; 数据库（DB）–&amp;gt; 表（Table）–&amp;gt; 字段（Filed）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;命令&quot;&gt;命令&lt;/h1&gt;
+&lt;p&gt;https://www.runoob.com/sql/sql-syntax.html&lt;/p&gt;
+
+&lt;h3 id=&quot;基础命令&quot;&gt;基础命令&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;登陆：mysql -hPup
+-h，主机地址，本地为localhost，远程为IP地址&lt;br /&gt;
+-P，端口号，用来找软件&lt;br /&gt;
+-u，用户名&lt;br /&gt;
+-p，密码&lt;/li&gt;
+  &lt;li&gt;show … like …&lt;br /&gt;
+show databases [like ‘pattern’];&lt;br /&gt;
+show tables [like ‘pattern’];&lt;br /&gt;
+show collation;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;库操作&quot;&gt;库操作&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;show databases [like ‘pattern’];&lt;br /&gt;
+pattern为匹配模式：&lt;br /&gt;
+%匹配多个字符&lt;br /&gt;
+_匹配单个字符，所以匹配的名称有_时需要用_转义&lt;br /&gt;
+如show databases like ‘%abc’;表示匹配所有以abc结尾的库&lt;/li&gt;
+  &lt;li&gt;create database + 数据库名称 + [库选项];&lt;br /&gt;
+选项为空默认即可，当业务上需要用到这些特性时在去搜索那个库选项合适&lt;/li&gt;
+  &lt;li&gt;drop database + 数据库名称;&lt;/li&gt;
+  &lt;li&gt;查看表的创建语句：show create table my_auto;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;表操作&quot;&gt;表操作&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;show tables [like ‘pattern’];&lt;br /&gt;
+pattern为匹配模式：&lt;br /&gt;
+%匹配多个字符&lt;br /&gt;
+_匹配单个字符，所以匹配的名称有_时需要用_转义&lt;br /&gt;
+如show tables like ‘%abc’;表示匹配所有以abc结尾的表&lt;/li&gt;
+  &lt;li&gt;复制表create table + 表名 + like + [数据库名(当前可省).]表名;&lt;/li&gt;
+  &lt;li&gt;show columns from + 表名;&lt;/li&gt;
+  &lt;li&gt;create table [if not exists] + tblname(lowName type,lowName type)[表选项];&lt;br /&gt;
+选项为空默认即可，当业务上需要用到这些特性时在去搜索那个表选项合适&lt;/li&gt;
+  &lt;li&gt;rename table 旧表名 to 新表名;&lt;/li&gt;
+  &lt;li&gt;drop table + 表1, 表2 … ;&lt;/li&gt;
+  &lt;li&gt;新增字段，基本语法：alter table + 表名 + add + [column] + 字段名 + 数据类型 + [列属性][位置]; &lt;br /&gt;
+其中，位置表示此字段存储的位置，分为first（第一个位置）和after + 字段名（指定的字段后，默认为最后一个位置）.&lt;br /&gt;
+示例：alter table student add column id int first;&lt;/li&gt;
+  &lt;li&gt;修改字段，基本语法：alter table + 表名 + modify + 字段名 + 数据类型 + [列属性][位置];&lt;/li&gt;
+  &lt;li&gt;重命名字段，基本语法：alter table + 表名 + change + 旧字段名 + 新字段名 + 数据类型 + [列属性][位置];&lt;/li&gt;
+  &lt;li&gt;删除字段，基本语法：alter table + 表名 + drop+ 字段名;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;数据操作&quot;&gt;数据操作&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;增：insert into + 表名(字段列表) + values(值列表);&lt;/li&gt;
+  &lt;li&gt;复制，可以自己复制自己，来做指数复制(蠕虫复制，用于压力测试)：&lt;br /&gt;
+insert into my_copy select * from my_copy;&lt;/li&gt;
+  &lt;li&gt;更新主键，当主键已经存在，新增一条数据将报错，可以使用replace 代替insert&lt;/li&gt;
+  &lt;li&gt;减：delete from test where grade = ‘3.1’ [limit cnt];&lt;/li&gt;
+  &lt;li&gt;改：update + 表名 + set + 字段 = 值 + [where 条件] [limit cnt];&lt;/li&gt;
+  &lt;li&gt;查：select + 字段名称[,字段名称] + from + 表名 + [where 条件];&lt;/li&gt;
+  &lt;li&gt;
+    &lt;ul&gt;
+      &lt;li&gt;查询 + 排序：order by + 字段名 + [asc升(默认)/desc降];&lt;br /&gt;
+如：select [all(默认，可省)/distinct去重]* from tableName order by name;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;ul&gt;
+      &lt;li&gt;where可以用：&lt;br /&gt;
+比较运算符：&amp;gt;、&amp;lt;、&amp;gt;=、&amp;lt;=、&amp;lt;&amp;gt;、=、like、between and、in和not in；&lt;br /&gt;
+逻辑运算符：&amp;amp;&amp;amp;、||、和!.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;校对集&quot;&gt;校对集&lt;/h3&gt;
+&lt;p&gt;影响排序，已有数据再修改校对集，则旧数据不会改变排序
+_bin：binary，二进制比较，区分大小写&lt;br /&gt;
+_cs：case sensitive，大小写敏感，区分大小写&lt;br /&gt;
+_ci：case insensitive，大小写不敏感，不区分大小写&lt;/p&gt;
+
+&lt;h3 id=&quot;数据类型&quot;&gt;数据类型&lt;/h3&gt;
+&lt;p&gt;http://www.runoob.com/mysql/mysql-data-types.html&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;注意任何一条记录最长不超过 65535 个字节，而且varchar的最大长度由编码字符集决定（编码集决定一个字符占几个字节，不一定是65535的倍数）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;列属性&quot;&gt;列属性&lt;/h3&gt;
+&lt;p&gt;比较实用的：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;comment，仅仅提供给开发人员看的备注&lt;br /&gt;
+create table tblName(name varchar(20) comment ‘姓名’)charset utf8;&lt;/li&gt;
+  &lt;li&gt;default，默认值,insert时，如果不设置该列，则使用默认值
+create table tblName(name varchar(20) default ‘nycko’)charset utf8;&lt;/li&gt;
+  &lt;li&gt;auto_increment，自动增长，必须与键一起用，则，该列需要是一个索引，列的key属性有值&lt;br /&gt;
+create table my_auto(
+  id int primary key auto_increment,
+  name varchar(20) not null
+)charset utf8;&lt;br /&gt;
+给null时则触发自动增长，否则根据输入值，下一次则从前一个值+1
+insert into my_auto values(null,’Guo’);&lt;br /&gt;
+改为自增长，只能修改成更大的值：alter table + 表名 + auto_increment = 值;&lt;br /&gt;
+查看目前自增长情况：show variables like ‘auto_increment%’;
+修改步长：set auto_increment_increment = 值;&lt;br /&gt;
+删除自增长属性：alter table my_auto modify id int&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;键&quot;&gt;键&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;primary key，主键，一个table只能有一列使用，该列不能重复&lt;br /&gt;
+create table my_pri1(
+  name varchar(20) not null comment ‘姓名’,
+  number char(10) primary key comment ‘学号’
+)charset utf8;&lt;/li&gt;
+  &lt;li&gt;复合主键
+create table my_pri2(
+  number char(10) not null comment ‘学号’,
+  course char(10) not null comment ‘课程编号’,
+  score tinyint unsigned default 60,
+  – 增加主键限制，知道学号再知道课程编号才能确定唯一的分数值，具有唯一性
+  primary key(number,course)
+)charset utf8;&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;某列（已有数据不重复的列）改为主键
+alter table my_pri3 add primary key(course);&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;unique或者unique key，唯一键，其实就是允许为空的“主键”，以下两行等价&lt;br /&gt;
+create table my_unique2(number char(10) not null,name varchar(20) not null,unique key(number))charset utf8;
+create table my_unique2(number char(10) not null primary key,name varchar(20) not null)charset utf8;&lt;/li&gt;
+  &lt;li&gt;某列（已有数据不重复的列）改为唯一
+alter table my_unique3 add unique key(number);&lt;/li&gt;
+  &lt;li&gt;删除唯一键，并不会删除该列，只是删除属性
+alter table my_unique3 drop index number;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;关系&quot;&gt;关系&lt;/h3&gt;
+&lt;p&gt;一张表中一个字段经常与另一张表的某个(些)字段有关系，分为 3 种，分别为：一对一(1:1)，一对多(1:N)（或多对一(N:1)）和多对多(N:N)&lt;br /&gt;
+特别的，多对多一般使用中间表来记录两张表之间的关系&lt;/p&gt;
+
+&lt;h3 id=&quot;范式&quot;&gt;范式&lt;/h3&gt;
+&lt;p&gt;https://blog.csdn.net/qq_35246620/article/details/72677626&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;第一范式要求字段的数据具有原子性，不可再分。则取出来的数据不需要拆分能直接参与运算&lt;/li&gt;
+  &lt;li&gt;第二范式就是要解决表设计中不允许出现部分依赖。设置了复合主键，单某些字段只跟一个主键有关，其他主键无关，则部分依赖&lt;/li&gt;
+  &lt;li&gt;第三范式就是要解决表设计中出现传递依赖的问题&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Thu, 17 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/mysql.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/mysql.html</guid>
+        
+        <category>Common</category>
+        
+        <category>C++</category>
+        
+        <category>sql</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>开源项目--Grpc</title>
+        <description>&lt;h1 id=&quot;简述grpc&quot;&gt;简述Grpc&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&quot;https://grpc.io/&quot;&gt;官方链接&lt;/a&gt;&lt;br /&gt;
+本人毕业接触的第一个服务器项目就是基于Grpc的，当时还不是特别懂，而最近搭建了一个基于&lt;a href=&quot;https://github.com/baidu/sofa-pbrpc&quot;&gt;sofa-pbrpc&lt;/a&gt;的服务器，这样对比下来，发现Grpc的开发体验还是比较好的，当然也许pbrpc也有自己的优势，如&lt;a href=&quot;https://github.com/baidu/sofa-pbrpc/wiki/Profiling%E5%8A%9F%E8%83%BD&quot;&gt;profiling功能&lt;/a&gt;。&lt;br /&gt;
+但是最终还是没有逃过多语言开发的问题，pbrpc官方提供了C++版本以及python示例，而Grpc基本覆盖了常用语言包括C++/Java/Python/C#/Ruby/Go/Js/PHP等等&lt;br /&gt;
+原本打算利用Jni技术提供pbrpc给Java，但是又遇到了pbrpc官方不支持windows编译的问题，当然建立vsproj修改一下代码也能解决，但是觉得没必要这样折腾，于是近日尝试着快速用Grpc替换pbrpc，同时做下笔记。&lt;/p&gt;
+
+&lt;h1 id=&quot;环境&quot;&gt;环境&lt;/h1&gt;
+&lt;p&gt;我一开始的工作环境是CentOS6.5，实属公司历史遗留问题，对应的gcc4.4.7/glibc2.12，不支持c++11等，当然你可以升级，gcc升级还搞得定，glibc升级实在痛苦，所以坚持要求新服务器版本提升到&lt;a href=&quot;http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso&quot;&gt;CentOS7&lt;/a&gt;，如此一来各种第三方库的源码安装基本不会遇到什么问题了&lt;/p&gt;
+
+&lt;h1 id=&quot;源码编译安装grpc&quot;&gt;源码编译安装grpc&lt;/h1&gt;
+&lt;p&gt;由于国内网速问题，我都是直接下载github的zip的，而不会使用git下载，我自己觉得会比较快&lt;br /&gt;
+以下暂时简单记录大概过程，日后遇到新问题，更新记录&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;下载grpc源码&lt;/li&gt;
+  &lt;li&gt;手动下载thirdparty下各第三方仓库源码，解压到本地对应目录&lt;/li&gt;
+  &lt;li&gt;linux编译不会出现什么问题，如果出错，查看输出处理就好&lt;/li&gt;
+  &lt;li&gt;windows编译需要使用cmake创建vsproj，其中可能遇到一些错误，而我只缺perl，下载一个strawberryperl，配置好cmake路径即可&lt;/li&gt;
+  &lt;li&gt;vsproj创建出来直接生成所有项目基本不会有问题&lt;/li&gt;
+  &lt;li&gt;编译运行example中的helloworld工程，linux上直接make即可&lt;/li&gt;
+  &lt;li&gt;本人需要在linux上搭建服务器，linux和windows上都开发客户端&lt;br /&gt;
+所以在windows上，新建独立vs工程&lt;br /&gt;
+代码只需要拷贝出xxxClient.cc以及protoc编译出的4个文件(linux上编译的即可)&lt;br /&gt;
+由于vs工程的缘故，需要处理一下预编译头的问题&lt;br /&gt;
+然后先点击生成，根据编译错误，添加各种头文件以及库的路径，最终我是需要添加&lt;br /&gt;
+库：zlibd.lib crypto.lib ssl.lib gpr.lib grpc.lib grpc++.lib libprotobufd.lib&lt;br /&gt;
+包含路径：.\third_party\protobuf\src  和 .\include&lt;br /&gt;
+编译通过后运行，zlib是动态库需要把zlib.dll放到exe当前目录，当然也可以进一步处理把zlib做成静态库&lt;/li&gt;
+  &lt;li&gt;确保网络通畅（能ping能telnet）后，顺利通过测试&lt;/li&gt;
+  &lt;li&gt;仿照helloworld测试工程构建自己的linux上服务器和客户端工程，可以直接利用其makefile，例如其makefile将对protobuf版本进行判断，以免由于版本问题导致比较难发现的问题&lt;/li&gt;
+  &lt;li&gt;仿照上述helloworld的vs工程，构建windows客户端工程&lt;/li&gt;
+  &lt;li&gt;以上基本就是grpc入门搭建环境以及搭建第一个工程的过程&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;protobuf&quot;&gt;protobuf&lt;/h1&gt;
+
+&lt;h1 id=&quot;grpc-c&quot;&gt;grpc-c++&lt;/h1&gt;
+
+&lt;h1 id=&quot;grpc-other-language&quot;&gt;grpc-other-language&lt;/h1&gt;
+&lt;p&gt;官网做的还是挺不错的，各家语言的guide都键全，概念和代码逻辑基本是一样的，主要是开发环境的搭建&lt;br /&gt;
+本人主要折腾c++，而且为了不维护多份代码，使用c/c++开发，通过如jni等技术提供给java(其他语言)调用也未尝不是一件好事，所以这里暂时不介绍其他语言&lt;br /&gt;
+当时折腾java版本由于一些依赖关系没有设置好，所以没有成功，理论上使用MAVEN项目应该不难&lt;/p&gt;
+</description>
+        <pubDate>Thu, 17 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/Grpc.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/Grpc.html</guid>
+        
+        <category>Common</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>升级Gcc</title>
+        <description>&lt;p&gt;虽然网上一捉一大把，但是遇到了点问题，这里自己记录以下&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mv /etc/yum.repos.d /etc/yum.repos.d.bak
+wget http://people.centos.org/tru/devtools-2/devtools-2.repo
+mv devtools-2.repo /etc/yum.repos.d
+yum install devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;最后一步yum install可能会遇到repo文件有问题，跟环境变量应该有关系
+devtools-2.repo：&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Thu, 17 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/GccUpdate.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/GccUpdate.html</guid>
+        
+        <category>Common</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>Gmssl实现SM2签名验签</title>
+        <description>&lt;h1 id=&quot;官方资料&quot;&gt;官方资料&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&quot;http://gmssl.org/&quot;&gt;Gmssl&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;http://gmssl.org/docs/evp-api.html&quot;&gt;GmSsl的EVP接口&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;个人经历&quot;&gt;个人经历&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;官方做签名时虽然EVP_PKEY结构体可以适配SM2，但是示例用EVP_sha256()作为摘要算法，顺利避开了SM3WithSM2的问题。（刚接触SM2/SM3的朋友可能不太知道问题在哪，下面会说到）&lt;/li&gt;
+  &lt;li&gt;那么，SM2结合SM3的代码应该怎么写。第一时间当然是使用网站上的示例，修改EVP_sha256()为EVP_sm3()，这样代码可以兼容SM2和RSA的签名验签了，但是这样坐下来，发现我可以自签自验，但是无法验证第三方签名。&lt;/li&gt;
+  &lt;li&gt;忽略查源码，查资料的过程，我发现这一套EVP接口内部并没有帮我做SM3WithSM2的摘要，只是单纯的SM3。(&lt;a href=&quot;https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/doc/SM2%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E4%BD%BF%E7%94%A8%E8%A7%84%E8%8C%83.pdf&quot;&gt;请查阅8.1/8.2&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;我一直以为EVP接口内部将能帮我实现这部分内容，然而…… 进而我查阅源码发现test文件夹（哎~发现得有点晚）里面就有相关代码。test\sm2test.c : test_sm2_sign&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;个人代码以及解释&quot;&gt;个人代码以及解释&lt;/h1&gt;
+&lt;p&gt;源码中test里的代码其实够用了，但是一下贴一下本人的版本，主要是为了讲解一下SM3WithSM2的摘要流程，所以copy了test代码，写一个比较精简的示例(&lt;a href=&quot;https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/GmSsl/sm2Test.cc&quot;&gt;代码链接&lt;/a&gt;)&lt;br /&gt;
+编译命令,注意ssl指gmssl的动态库&lt;br /&gt;
+g++ -o test sm2Test.cc -lssl&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;普通SM3摘要
+    &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hashForSM3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;  
+  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  
+  &lt;span class=&quot;c1&quot;&gt;//初始化摘要结构体   &lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EVP_MD_CTX&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EVP_MD_CTX_create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;  
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;   
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EVP_MD_CTX_init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; 
+    
+  &lt;span class=&quot;c1&quot;&gt;//设置摘要算法和密码算法引擎&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EVP_DigestInit_ex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EVP_sm3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;   
+      &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    
+  &lt;span class=&quot;c1&quot;&gt;//输入原文clearText&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EVP_DigestUpdate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; 
+      &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    
+  &lt;span class=&quot;c1&quot;&gt;//输出摘要值，外部判断ret是否为32作为成功条件&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;EVP_DigestFinal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EVP_MD_CTX_destroy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mdctx&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;SM3WithSM2流程
+    &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hashForSM3WithSM2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pukLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//以下为国密标准推荐参数，id=&quot;1234567812345678&quot;，长度是128bit则0x0080&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm2_par_dig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;210&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//idlen[2]+id[16]+parm[128]+puk[64]&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0x00&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x80&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0x31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x33&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x35&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x36&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x37&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x31&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x33&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x35&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x36&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x37&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x00&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xE9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xFA&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x9E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x9D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x9F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x5E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x34&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x5A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x9E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xCF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x65&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x09&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xA7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0xF3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x97&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x89&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xF5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x15&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xAB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x8F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x92&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xDD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xBC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xBD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x41&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x94&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x0E&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x93&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0x32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xC4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xAE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x2C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x1F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x19&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x81&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x19&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x5F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x99&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x04&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x46&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x6A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x39&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xC9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x94&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0x8F&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xE3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x0B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xBF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xF2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x66&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x0B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xE1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x71&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x5A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x45&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x89&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x33&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x74&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xC7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0xBC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x37&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x36&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xA2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xF4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xF6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x77&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x9C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x59&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xBD&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xCE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xE3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x6B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x69&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x21&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x53&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;mh&quot;&gt;0xD0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xA9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x87&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x7C&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xC6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x2A&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x47&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x40&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x02&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xDF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xE5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x21&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x39&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xF0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xA0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;//对应规范pdf中的章节8.1&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm2_par_dig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;128&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pukLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hashForSM3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm2_par_dig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;210&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)){&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; 
+  &lt;span class=&quot;c1&quot;&gt;//对应规范pdf中的章节8.2&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;memcpy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hashForSM3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)){&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;delete&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3_e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;main函数
+    &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;BIO&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_pri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;BIO&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_puk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EVP_PKEY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_pri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EC_KEY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prikey&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EVP_PKEY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;EC_KEY&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pubkey&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;X509&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cert&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pukLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;nycko&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strlen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3DataLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1024&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;c1&quot;&gt;///////////////////////////////////公钥相关结构&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;bio_puk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BIO_new_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SM2Test.cer&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;r&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;cert&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d2i_X509_bio&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X509_get_pubkey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;pubkey&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EVP_PKEY_get0_EC_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//don't free&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pubkey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;//要去除04标识&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;pukLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i2d_PublicKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;///////////////////////////////////私钥相关结构&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;bio_pri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BIO_new_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SM2Test.pem&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;r&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;pkey_pri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PEM_read_bio_PrivateKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;prikey&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EVP_PKEY_get0_EC_KEY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//don't free&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;prikey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;c1&quot;&gt;///////////////////////////////////sm3 sm2 sign/verify&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hashForSM3WithSM2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clearText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;clearTextLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pukLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SM2_sign&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NID_undef&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3DataLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prikey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; 
+      &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;out[%d]:&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  	&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%02x &quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+  	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  		&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SM2_verify&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NID_undef&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3Data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm3DataLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pubkey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; 
+      &lt;span class=&quot;k&quot;&gt;goto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    
+  &lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;verify success&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ERR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;OPENSSL_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BIO_free_all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BIO_free_all&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bio_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EVP_PKEY_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_pri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;EVP_PKEY_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X509_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;代码中需要注意的小细节&quot;&gt;代码中需要注意的小细节&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;openssl的风格中，经常出现xxxget/xxxget0/xxxget1几个方法共存，如以上代码用到的&lt;br /&gt;
+EVP_PKEY_get0_EC_KEY
+&lt;a href=&quot;https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_get0_EC_KEY.html&quot;&gt;官方doc&lt;/a&gt;解释如下：&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;EVP_PKEY_get1_EC_KEY() return the referenced key in pkey or NULL if the key is not of the correct type.&lt;br /&gt;
+EVP_PKEY_get0_EC_KEY() also return the referenced key in pkey or NULL if the key is not of the correct type but the reference count of the returned key is not incremented and so must not be freed up after use.&lt;/p&gt;
+
+&lt;p&gt;简单来说就是：EVP_PKEY_get0_EC_KEY不需要free，而EVP_PKEY_get1_EC_KEY需要，看看源码应该很容易区分原理，本人没有仔细研究，大概就是EVP_PKEY_get0_EC_KEY直接指向了EVP_PKEY中的EC_KEY，单独free掉EC_KEY会造成对EVP_PKEY进行free时出现double free&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;代码中出现
+    &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pukLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i2d_PublicKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pkey_puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;OPENSSL_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//普通缓冲区释放方法&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;这里取一个更有代表性的代码例子：
+    &lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pvk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;your pvk pkcs1 data&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pvk_tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pvk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//以下函数将会改变pvk_tmp的指向&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//d2i_PrivateKey第二个参数类型为EVP_PKEY**，传NULL可以内部new并作为返回值&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;EVP_PKEY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pkey&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;d2i_PrivateKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;evpType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pvk_tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pvk&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;这里常见两个问题：&lt;br /&gt;
+1：openssl某些接口当传入NULL时，内部将为你分配内存，如以上的puk和pkey，你需要手动释放。&lt;br /&gt;
+2：某些接口传入2级指针，很可能会改变指向，所以我习惯只要传二级指针都如上述代码的方法，用一个临时指针传入，免得原数据指针被改变，如d2i_PrivateKey就是我确认会改变指向的接口&lt;/p&gt;
+
+</description>
+        <pubDate>Wed, 16 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/GmSsl-SM2.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/GmSsl-SM2.html</guid>
+        
+        <category>PKI</category>
+        
+        <category>GmSsl</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>开源项目--Glog</title>
+        <description>&lt;h1 id=&quot;目录&quot;&gt;目录&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;简述Glog&lt;/li&gt;
+  &lt;li&gt;Glog使用示例&lt;/li&gt;
+  &lt;li&gt;根据需求定制自己的Glog&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;简述glog&quot;&gt;简述Glog&lt;/h1&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/google/glog&quot;&gt;GitHub链接&lt;/a&gt;&lt;br /&gt;
+Glog是google的开源日志系统，我自己接触的第一个日志库就是Glog，习惯了，对于我一直以来的工作，我的应用程度上也没有什么缺点，反而有些我觉得很方便的地方，Glog的特性官方的描述我就不粘贴了，百度一大把，下面会结合一点实际场景说明我觉好用的地方&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;最简单的启用就直接一句话：google::InitGoogleLogging(“LogName”);&lt;/li&gt;
+  &lt;li&gt;输出语句也很简单，自动补回车，自行加回车也不会输出一个空行，下面两句输出结果一致：&lt;br /&gt;
+  LOG(INFO) « “abc”;&lt;br /&gt;
+  LOG(INFO) « “abc\n”;&lt;/li&gt;
+  &lt;li&gt;输出内容不需要调整的情况下，基本满足DEBUG需求，如带有文件名和行数:&lt;br /&gt;
+  等级+日期 时间 PID 文件：行数&lt;br /&gt;
+  I0514 15:52:26.102143 96944 common.cpp:59] 1a 1d 65 94 1a e2 f3 31&lt;/li&gt;
+  &lt;li&gt;输出文件也方便，默认按照PID新建文件，携带新建时间，尤其方便的是会建立软链接到最新创建的日志，查看日志只需要查看软链接，免去了判断哪个文件才是当前最新的烦恼&lt;/li&gt;
+  &lt;li&gt;代码量不多（我没有对比过其他日志库的源码），对应不同场景，可以尝试修改源码适配不同工程，如本人修改了文件的命名格式，以及新建日志文件的条件增加按天新建功能（则pid或者日期改变都将新建一个日志文件）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;glog使用示例&quot;&gt;Glog使用示例&lt;/h1&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;glog/logging.h&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InitGoogleLogging&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;LogName&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetLogDestination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;INFO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/var/logs/LogName-&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetLogDestination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;WARNING&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;var/logs/LogName-&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetLogDestination&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;google&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ERROR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;/var/logs/LogName-&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;FLAGS_logbufsecs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//缓冲日志输出，默认为30秒，此处改为立即输出&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;FLAGS_stop_logging_if_full_disk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;//当磁盘被写满时，停止日志输出&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;FLAGS_minloglevel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//INFO=0,WARNING=1,ERROR=2 &lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;LOG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;INFO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Build time : &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__DATE__&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot; - &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__TIME__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//输出编译时间&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;大多数设置有默认值，而更多设置可以直接查看头文件：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;搜索带”set”关键字的方法，如：SetLogDestination&lt;/li&gt;
+  &lt;li&gt;搜索”DECLARE_“，可以找到一系列GFLAG变量，如最小输出等级的定义：&lt;br /&gt;
+  DECLARE_int32(minloglevel);&lt;br /&gt;
+  那么我们可以用以下语句来修改（也可以运行程序时带参数指定）：&lt;br /&gt;
+  FLAGS_minloglevel = 0;&lt;/li&gt;
+  &lt;li&gt;另外查看头文件也能发现很多其他应用，如有一系列结合断言的LOG宏（如LOG_ASSERT）等等，本人并未使用，比多做描述&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;根据需求定制自己的glog&quot;&gt;根据需求定制自己的Glog&lt;/h1&gt;
+&lt;h2 id=&quot;例如本人工作上希望日志能按天区分每一个文件这样避免一个文件太大以及查错方便等等&quot;&gt;例如，本人工作上希望日志能按天区分每一个文件，这样避免一个文件太大，以及查错方便等等。&lt;/h2&gt;
+
+&lt;p&gt;首先我们可以简单浏览以下源码，新建日志文件主要是每次Write时判断以下条件&lt;br /&gt;
+src\logging.cc : LogFileObject::Write&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;static_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_length_&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaxLogSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;PidHasChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;src\utilities.cc : PidHasChanged&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g_main_thread_pid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getpid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;PidHasChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getpid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g_main_thread_pid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;g_main_thread_pid&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;hr /&gt;
+&lt;h2 id=&quot;可见我们只需要仿照着写一个函数加入到条件判断即可符合我们的需求&quot;&gt;可见，我们只需要仿照着写一个函数，加入到条件判断，即可符合我们的需求&lt;/h2&gt;
+&lt;p&gt;src\logging.cc : LogFileObject::Write&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;static_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_length_&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;MaxLogSize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;PidHasChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;DayHasChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;src\utilities.cc : DayHasChanged&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g_main_day&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;bool&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;DayHasChanged&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;time_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;raw_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tm&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tm_info&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;raw_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;localtime_r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;raw_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_mday&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g_main_day&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;g_main_day&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tm_info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_mday&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;hr /&gt;
+&lt;h2 id=&quot;再有我当时觉得文件名时间去到了时分秒没必要反而因为文件名太长在显示上觉得不舒服&quot;&gt;再有，我当时觉得文件名时间去到了时分秒没必要，反而因为文件名太长在显示上觉得不舒服&lt;/h2&gt;
+&lt;p&gt;同样，不难发现还是在src\logging.cc : LogFileObject::Write方法中，新建文件时构造了文件名的格式，主要涉及以下变量&lt;br /&gt;
+ostringstream time_pid_stream;
+找到了这个变量，接下来的几行代码，就可以随意修改成更适合当前工程上使用的版本了&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;ostringstream&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time_pid_stream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;time_pid_stream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fill&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sc&quot;&gt;'0'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;time_pid_stream&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1900&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_year&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_mon&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tm_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tm_mday&lt;/span&gt;
+                &lt;span class=&quot;cm&quot;&gt;/****del by nycko for filename
+                &amp;lt;&amp;lt; '-'
+                &amp;lt;&amp;lt; setw(2) &amp;lt;&amp;lt; tm_time.tm_hour
+                &amp;lt;&amp;lt; setw(2) &amp;lt;&amp;lt; tm_time.tm_min
+                &amp;lt;&amp;lt; setw(2) &amp;lt;&amp;lt; tm_time.tm_sec
+                *****del by nycko for filename*/&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'-'&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;GetMainThreadPid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+                &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;.log&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Fri, 11 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/Glog.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/Glog.html</guid>
+        
+        <category>Common</category>
+        
+        <category>OpenSource</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>分享一下Pull Request成功的小喜悦</title>
+        <description>&lt;h1 id=&quot;我的pull-request经历&quot;&gt;我的Pull Request经历&lt;/h1&gt;
+&lt;p&gt;很多人知道Git，开始使用了，也许也没有体会到Git平台的意义，这里分享一下，一定程度上了解一下&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;首先是本人需要使用OpenSsl从事PKI相关工作，由于需要开发国密SM2/SM3/SM4/SM9等，所以转而使用&lt;a href=&quot;http://gmssl.org/&quot;&gt;GmSSL&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;参考源码测试示例代码，在开发SM2加解密功能时，遇到解密失败，从调用代码检查清楚无发现错误后，怀疑是否某些参数设置错误，转而研究其源码，最后发现返回值在返回前被释放，经过测试，确定这就是罪魁祸首：&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    &lt;span class=&quot;n&quot;&gt;SM2CiphertextValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;SM2CiphertextValue&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;cm&quot;&gt;/*.......*/&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;SM2CiphertextValue_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cv&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;解决办法只需要在ret = cv;后加上cv = NULL;紧接着的free语句是支持NULL而不做任何工作的&lt;/li&gt;
+  &lt;li&gt;那么问题来了，虽然发现了bug，也能解决，但是如果你只修改本地代码，那么官方更新了什么功能，下载新源码后又需要修改该bug，麻烦。
+    &lt;h2 id=&quot;pull-request&quot;&gt;pull request&lt;/h2&gt;
+  &lt;/li&gt;
+  &lt;li&gt;首先你需要登陆你的GitHub账号，fork对方代码到自己仓库，clone是不行的，只有fork才能pull到对方仓库。&lt;/li&gt;
+  &lt;li&gt;然后clone你自己的仓库到本地，修改代码，提交，推送到自己的仓库&lt;/li&gt;
+  &lt;li&gt;这时候你自己的仓库则多了一次提交，然后前往对方的仓库，点击new pull request&lt;/li&gt;
+  &lt;li&gt;这里根据下图操作，对比你仓库的版本和对方仓库的版本，正确处理冲突后，则可以create pull request了，剩下的则是对方的处理了，对方将选择是否接受你的提交&lt;br /&gt;
+&lt;img src=&quot;https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/pullRequest.jpg?raw=true&quot; alt=&quot;create pull request&quot; /&gt;
+    &lt;h3 id=&quot;第一次被采纳还是很开心的虽然解决的也是很简单bug一行代码而已&quot;&gt;第一次被采纳还是很开心的，虽然解决的也是很简单bug，一行代码而已&lt;/h3&gt;
+    &lt;p&gt;&lt;img src=&quot;https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/GmsslPullRequest.jpg?raw=true&quot; alt=&quot;gmssl pull request&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Thu, 10 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/MyFirstPullRequest.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/MyFirstPullRequest.html</guid>
+        
+        <category>Common</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>利用boost::property_tree读取INI文件</title>
+        <description>&lt;ul&gt;
+  &lt;li&gt;本文主要通过读取INI配置文件的简单实例，初步使用boost::property_tree类&lt;/li&gt;
+  &lt;li&gt;该类的使用方法也非常简单，如下几行代码即可&lt;/li&gt;
+  &lt;li&gt;如xml/json等更多的使用方法请跳转：&lt;br /&gt;
+&lt;a href=&quot;https://www.boost.org/doc/libs/1_61_0/doc/html/property_tree.html&quot;&gt;boost::property_tree的官方描述&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;https://www.boost.org/doc/libs/1_61_0/doc/html/property_tree/reference.html#header.boost.property_tree.ini_parser_hpp&quot;&gt;boost::property_tree的方法&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;example&quot;&gt;Example:&lt;/h2&gt;
+&lt;p&gt;Test.ini&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SERVER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;IpAddr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;127.0.0.1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Test.cpp&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;boost/property_tree/ptree.hpp&amp;gt;    
+#include &amp;lt;boost/property_tree/ini_parser.hpp&amp;gt; 
+&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;boost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;property_tree&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ptree&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;        
+    &lt;span class=&quot;n&quot;&gt;boost&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;property_tree&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ini_parser&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read_ini&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;./Test.ini&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//在windows上vs编译后出现ipStr为乱码，原因未知，改用string即可正常处理&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;//char *ipStr = pt.get&amp;lt;std::string&amp;gt;(&quot;SERVER.IpAddr&quot;).c_str();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ip&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;SERVER.IpAddr&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Thu, 10 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/Read_INI_By_Boost.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/Read_INI_By_Boost.html</guid>
+        
+        <category>boost</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>JNI的基本使用</title>
+        <description>&lt;ul&gt;
+  &lt;li&gt;各种理论，jni和jna对比等，请自行百度，这里仅介绍一下基本使用方法，方便初学者，也给自己留一份笔记而已。&lt;/li&gt;
+  &lt;li&gt;介绍jni的使用流程&lt;/li&gt;
+  &lt;li&gt;示例了java中string和byte[]与c++的类型转换，以及容易忽略的内存泄漏问题&lt;/li&gt;
+  &lt;li&gt;简单介绍了native方法定义为static的相关问题&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;使用流程&quot;&gt;使用流程&lt;/h1&gt;
+&lt;p&gt;简单说一下jni的使用流程就像一个圆，从java出发，声明你需要的native方法，生成一个对应的.h文件，根据这个h文件构造c/c++工程生成dll/so动态库，最后返回来给java调用。&lt;/p&gt;
+&lt;h2 id=&quot;1--java-class&quot;&gt;1 : java class&lt;/h2&gt;
+&lt;p&gt;src/jni/LibTest.java:&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LibTest&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;System&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loadLibrary&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;jni_lib_LibTest&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;native&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;HelloWorld&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i_instr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;src/JniTest.java:&lt;/p&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;JniTest&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;LibTest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HelloWorld&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;I'm Nycko&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;到这里java的代码可以说是全部写完了，当main方法执行时，将调用LibTest的HelloWorld方法，该方法的实现来自于jni_lib_LibTest.dll(libjni_lib_LibTest.so)中，那么这个工程现在缺少的就是这个c++动态库了，下面来生成这个动态库。&lt;/p&gt;
+
+&lt;h2 id=&quot;2--dllso&quot;&gt;2 : dll/so&lt;/h2&gt;
+
+&lt;p&gt;无论是windows还是linux，你需要确保命令行可以运行javac，不行的自行百度安装jdk并且设置环境变量。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;在定义native的.java文件目录下用javac编译该文件获得.class文件。&lt;br /&gt;
+cd src/jni/&lt;br /&gt;
+javac LibTest.java&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;然后前往该项目的源码目录，用javah处理刚才生成的.class文件，这里javah后面跟的不是路径，而是java中的包名+类名(注意一下命令与文件路径(src/jni/LibTest.java)的关系)&lt;br /&gt;
+cd src/&lt;br /&gt;
+javah jni.LibTest&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;生成了一个.h文件，该文件官方说法是建议不要修改的，然后根据这个.h文件构建一个c/c++工程生成对应的动态库。&lt;br /&gt;
+jni_lib_LibTest.h：&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cm&quot;&gt;/* DO NOT EDIT THIS FILE - it is machine generated */&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;jni.h&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/* Header for class jni_lib_LibTest */&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#ifndef _Included_jni_lib_LibTest
+#define _Included_jni_lib_LibTest
+#ifdef __cplusplus
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;extern&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#endif
+&lt;/span&gt;&lt;span class=&quot;cm&quot;&gt;/*
+ * Class:     jni_lib_LibTest
+ * Method:    HelloWorld
+ * Signature: (Ljava/lang/String;)V
+ */&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;JNIEXPORT&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JNICALL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Java_jni_1lib_LibTest_HelloWorld&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;JNIEnv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jclass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jstring&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;cp&quot;&gt;#ifdef __cplusplus
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#endif
+#endif
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;编写对应c/cpp文件，jni_lib_LibTest.cpp：&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;jni_lib_LibTest.h&quot;
+#include &amp;lt;iostream&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;std&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;JNIEXPORT&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;JNICALL&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Java_jni_1lib_LibTest_HelloWorld&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;JNIEnv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jclass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jstring&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;j_i_inStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i_inStr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetStringUTFChars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j_i_inStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i_inStr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;i_inStr == NULl!&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;OutPut in jni_lib_LibTest.cpp!&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;cout&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;Helloworld! i_inStr is : &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i_inStr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;endl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ReleaseStringUTFChars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;j_i_inStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i_inStr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;编译成动态库&lt;br /&gt;
+某些系统会出现找不到jni.h和jni_md.h你需要把路径加入编译选项&lt;br /&gt;
+视情况加入：-I $(JAVA_HOME)/include/   &lt;br /&gt;
+视情况加入：-I $(JAVA_HOME)/include/linux（jni_md.h一般再include子目录下找一下就能找到了）&lt;br /&gt;
+g++ -shared -o libjni_lib_LibTest.so jni_lib_LibTest.cpp&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;3--java加载jni_lib_libtestdll--libjni_lib_libtestso&quot;&gt;3 : java加载jni_lib_LibTest.dll / libjni_lib_LibTest.so&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;把这个.dll(.so)动态库放到合适的地方，可以是系统默认库目录，也可以通过设置LD_LIBRARY_PATH的值实现，更多关于找不到库的问题需要视乎不同系统，不同平台，不同ide区分解决办法，这里不详细描述&lt;br /&gt;
+System.loadLibrary(“jni_lib_LibTest”); //注意文件名与库名的对应规则&lt;/li&gt;
+  &lt;li&gt;同样你也可以使用绝对路径来加载：如&lt;br /&gt;
+System.load(“/home/nycko/libjni_lib_LibTest.so”);&lt;/li&gt;
+  &lt;li&gt;运行java程序，输出如下：&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;OutPut&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jni_lib_LibTest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cpp&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Helloworld&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i_inStr&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Nycko&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;介绍两个常用的类型转换&quot;&gt;介绍两个常用的类型转换&lt;/h1&gt;
+&lt;p&gt;关于jni的内存管理，在这里不做详细描述，提供几个关键词进行搜索：&lt;br /&gt;
+Heap Memory/Native Memory/LocalReference/GlobalReference/Weak Global Reference&lt;br /&gt;
+目前个人简单理解是：除了使用JNIEnv方法创建的，然后return给java的对象以外，其他的都需要进行内存的释放，最基础的使用是java层入参，如：GetStringUTFChars把jstring类型转换成char*后，务必使用ReleaseStringUTFChars进行释放&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;string获取:&lt;br /&gt;
+获取传入参数String：jstring java_string&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str_cpp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetStringUTFChars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;java_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt; 
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str_cpp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//do something&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ReleaseStringUTFChars&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;java_string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str_cpp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;srting返回：&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;str&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;nycko&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//do something&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewStringUTF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;byte[]获取：&lt;br /&gt;
+获取jbyteArray java_byte&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;byte_len&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetArrayLength&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;java_byte&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;byte_value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;GetByteArrayElements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;java_byte&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;//do something&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ReleaseByteArrayElements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;java_byte&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jbyte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;byte_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;ul&gt;
+  &lt;li&gt;byte[]返回：&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;     &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;byte_len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;BYTE&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;byte_value&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BYTE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]();&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;jbyteArray&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jarrRV&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;NewByteArray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;byte_len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+     &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SetByteArrayRegion&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jarrRV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;byte_len&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;jbyte&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;byte_value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;jarrRV&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h1 id=&quot;关于java中native方法是否定义为static的问题&quot;&gt;关于java中native方法是否定义为static的问题：&lt;/h1&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;定义为static的方法不需要创建该类的实例就能调用，对应生成的.h文件第二个参数是jclass类型，由于不是实例，所以估计（java基础不足只能说估计）如果要在c++上使用这个参数也只能调用到同是static的其他成员变量或者方法&lt;/li&gt;
+  &lt;li&gt;非static方法需要先创建该类的实例才可以通过该实例调用，对应.h文件是第二个参数是jobject类型，是调用该方法的实例对象，可以用该变量在c++获取java该对象的其他成员&lt;/li&gt;
+  &lt;li&gt;所以，如果修改了java工程中相关定义，记得要根据新生成的.h文件来修改.c/.cpp文件，这个类型一定要对上&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Thu, 10 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/Jni.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/Jni.html</guid>
+        
+        <category>JAVA</category>
+        
+        <category>Common</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>ASN.1编码的OpenSsl实现</title>
+        <description>&lt;ul&gt;
+  &lt;li&gt;本文直接以实例进行说明，例子为国密SM2算法进行数字签名时的输出格式，如下：图片显示还没弄好，请跳转&lt;br /&gt;
+&lt;img src=&quot;https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/pic/sm2Asn1Data.jpg?raw=true&quot; alt=&quot;sm2Asn1Data.jpg&quot; /&gt;&lt;br /&gt;
+&lt;a href=&quot;https://gitee.com/nycko/Nycko-Pages/tree/master/PageSrc/ASN1OpenSsl&quot;&gt;代码链接&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;openssl提供的用于处理asn1的宏&quot;&gt;OpenSsl提供的用于处理ASN1的宏&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;ASN1_SEQUENCE 定义一个最外层是SEQUENCE类型的ASN1数据类型&lt;/li&gt;
+  &lt;li&gt;DECLARE_ASN1_FUNCTIONS 声明指定ASN1数据类型对应的函数&lt;/li&gt;
+  &lt;li&gt;IMPLEMENT_ASN1_FUNCTIONS 定义指定ASN1数据类型对应的函数&lt;/li&gt;
+  &lt;li&gt;以上宏主要实现i2d和d2i的OpenSsl类型到数据的转换，另外需要自己实现构造/析构/GET/SET等函数&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example：&lt;br /&gt;
+OpenSslAsn1.h:&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#pragma once
+#include &amp;lt;openssl/bn.h&amp;gt;
+#include &amp;lt;openssl/asn1.h&amp;gt;
+#include &amp;lt;openssl/asn1t.h&amp;gt;
+#include &amp;lt;openssl/objects.h&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;BIGNUM&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;BIGNUM&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;virtual&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;setY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;getY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;DECLARE_ASN1_FUNCTIONS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;/* 
+DECLARE_ASN1_FUNCTIONS展开如下
+Sm2Signature_Hander *Sm2Signature_Hander_new(void);//新构造这么一个类
+void Sm2Signature_Hander_free(Sm2Signature_Hander *a); //释放
+Sm2Signature_Hander *d2i_Sm2Signature_Hander(Sm2Signature_Hander **a, 
+    const unsigned char **in, long len);//把in里的数据转换成该类
+int i2d_Sm2Signature_Hander(Sm2Signature_Hander *a, 
+    unsigned char **out);//把该类转换成数据
+const ASN1_ITEM * Sm2Signature_Hander_it(void);//iterator 迭代器
+*/&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;OpenSslAsn1.c&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;#include &quot;OpenSslAsn1.h&quot;
+&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::~&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_bin2bn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_bin2bn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_bn2bin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BN_bn2bin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ASN1_SEQUENCE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ASN1_SIMPLE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BIGNUM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;ASN1_SIMPLE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;BIGNUM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ASN1_SEQUENCE_END&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;IMPLEMENT_ASN1_FUNCTIONS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;以上代码则定义了一套函数用于编码以及解析“国密SM2算法进行数字签名时的输出格式”的ASN.1数据&lt;br /&gt;
+可以如下使用：&lt;/p&gt;
+&lt;div class=&quot;language-cpp highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;//把x，y的数据按照Sm2Signature_Hander数据结构定义的ASN.1格式编码到缓冲区out中。&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander_new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;128&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i2d_Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander_free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;//从ASN.1数据中解码出原始数据&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;Sm2Signature_Hander&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sm2Sign1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 
+    &lt;span class=&quot;n&quot;&gt;d2i_Sm2Signature_Hander&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;NULL&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;outLen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yLen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sm2Sign&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+</description>
+        <pubDate>Thu, 10 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/ASN1Openssl.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/ASN1Openssl.html</guid>
+        
+        <category>PKI</category>
+        
+        <category>OpenSsl</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+      <item>
+        <title>ASN.1编码规则</title>
+        <description>&lt;h1 id=&quot;asn1&quot;&gt;ASN.1&lt;/h1&gt;
+
+&lt;h2 id=&quot;ber编码&quot;&gt;BER编码&lt;/h2&gt;
+
+&lt;h3 id=&quot;一基本规则&quot;&gt;一.基本规则&lt;/h3&gt;
+
+&lt;p&gt;BER（BasicEncoding Rules）是ASN.1中最早定义的编码规则，其他编码规则是在BER的基础上添加新的规则构成。&lt;/p&gt;
+
+&lt;h4 id=&quot;1ber传输语法的格式一直是tlv三元组&quot;&gt;1.BER传输语法的格式一直是TLV三元组&lt;/h4&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Tag&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Length&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Value&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;类型&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Value的长度&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;值&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h4 id=&quot;2ber传输语法是基于八位组大端编码的高八位在左&quot;&gt;2.BER传输语法是基于八位组大端编码的，高八位在左。&lt;/h4&gt;
+
+&lt;h2 id=&quot;以下按tlv3部分讲解&quot;&gt;以下按TLV3部分讲解&lt;/h2&gt;
+&lt;h3 id=&quot;1tag&quot;&gt;1.Tag&lt;/h3&gt;
+&lt;p&gt;Tag是一个或若干个八位组&lt;br /&gt;
+目前我遇到的都只有一个八位组，所以一下仅写universalTag类型&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;7&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;6&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;5&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;4~0&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0/1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0~30&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;7、6位指明Tag的类型，00表示UniversalTag类型;&lt;br /&gt;
+5位指明该类型以primitive方式编码还是constructed方式编码；&lt;br /&gt;
+因此SEQUENCE、SET类型Tag对应16(0x10)、17(0x11)将编码为0x30、0x31&lt;br /&gt;
+4~0位指明对应的UniversalTag类型（值是0-30）：注意这里的30是十进制。&lt;/p&gt;
+
+&lt;p&gt;ASN.1中定义的UNIVERSAL类Tag&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Tag&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;16进制编码&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;类型&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x00&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;BER保留&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x01&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;BOOLEAN&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;2&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x02&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;INTEGER&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;3&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x03&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;BIT STRING&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;4&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x04&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;OCTET STRING&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;5&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x05&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;NULL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;6&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x06&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;OBJECT IDENTIFIER&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;7&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x07&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;ObjectDescripion&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;8&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x08&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;EXTERNAL,INSTANCE OF&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;9&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x09&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;REAL&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;10&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x0A&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;ENUMERATED&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;11&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x0B&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;EMBEDDED PDV&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;12&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x0C&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;UFT8String&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;13&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x0D&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;RELATIVE-OID&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;14&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x0E&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;保留&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;15&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x0F&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;保留&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;16&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x30&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;SEQUENCE,SEQUENCE OF&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;17&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x31&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;SET,SET OF&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;18&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x12&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;NumericString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;19&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x13&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;PrintableString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;20&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x14&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;TeletexString,T61String&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;21&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x15&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;VideotexString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;22&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x16&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;IA5String&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;23&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x17&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;UTCTime&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;24&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x18&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;GeneralizedTime&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;25&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x19&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;GraphicString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;26&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x1A&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;VisibleString,ISO646String&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;27&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x1B&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;GeneralString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;28&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x1C&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;UniversalString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;29&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x1D&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;CHARACTER STRING&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;30&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x1E&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;BMPString&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;31&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x1F&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;保留&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;2length&quot;&gt;2.Length&lt;/h3&gt;
+&lt;p&gt;BER编码中Length表示Value部分所占八位组的个数&lt;br /&gt;
+有两大类：定长方式（DefiniteForm）和不定长方式（IndefiniteForm）&lt;/p&gt;
+
+&lt;p&gt;(1).定长方式&lt;/p&gt;
+
+&lt;p&gt;定长方式中，按长度是否超过127（则7个位的存储范围），分为短、长两种形式（则用第8位来区分）：&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;实际长度&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Tag&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Length4Length&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Length&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Value&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0~127&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tag&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;NULL&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x00~0x7F&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Value&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;128~256^126-1&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tag&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x80+n&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;n个Length&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Value&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;判断方式：第一个Length的最高位是否为1&lt;br /&gt;
+Example:&lt;br /&gt;
+Length(1196==0x04AC)&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Length4Length&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Length&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x82&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x04 0xAC&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;(2).不定长方式&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Tag&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Length&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;Value&lt;/th&gt;
+      &lt;th style=&quot;text-align: left&quot;&gt;End&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Tag&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x80&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;Value&lt;/td&gt;
+      &lt;td style=&quot;text-align: left&quot;&gt;0x00 0x00&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Length所在八位组固定编码为0x80，但在Value编码结束后以两个0x00结尾。这种方式使得可以在编码没有完全结束的情况下，可以先发送部分消息给对方。&lt;/p&gt;
+</description>
+        <pubDate>Thu, 10 May 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/nycko-pages/c++/ASN1Format.html</link>
+        <guid isPermaLink="true">http://localhost:4000/nycko-pages/c++/ASN1Format.html</guid>
+        
+        <category>PKI</category>
+        
+        <category>Common</category>
+        
+        <category>C++</category>
+        
+        
+        <category>C++</category>
+        
+      </item>
+    
+  </channel>
+</rss>

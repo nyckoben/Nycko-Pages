@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/ASN1Format.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>ASN.1编码规则</title>
+  <meta name="description" content="ASN.1">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">ASN.1编码规则</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="10 May 2018" itemprop="datePublished">May 10 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">PKI</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">Common</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>ASN.1规则中数据的表示方法以及各数据类型的描述</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <h1 id="asn1">ASN.1</h1>
+
+<h2 id="ber编码">BER编码</h2>
+
+<h3 id="一基本规则">一.基本规则</h3>
+
+<p>BER（BasicEncoding Rules）是ASN.1中最早定义的编码规则，其他编码规则是在BER的基础上添加新的规则构成。</p>
+
+<h4 id="1ber传输语法的格式一直是tlv三元组">1.BER传输语法的格式一直是TLV三元组</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Tag</th>
+      <th style="text-align: left">Length</th>
+      <th style="text-align: left">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">类型</td>
+      <td style="text-align: left">Value的长度</td>
+      <td style="text-align: left">值</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="2ber传输语法是基于八位组大端编码的高八位在左">2.BER传输语法是基于八位组大端编码的，高八位在左。</h4>
+
+<h2 id="以下按tlv3部分讲解">以下按TLV3部分讲解</h2>
+<h3 id="1tag">1.Tag</h3>
+<p>Tag是一个或若干个八位组<br />
+目前我遇到的都只有一个八位组，所以一下仅写universalTag类型</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">7</th>
+      <th style="text-align: left">6</th>
+      <th style="text-align: left">5</th>
+      <th style="text-align: left">4~0</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">0/1</td>
+      <td style="text-align: left">0~30</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>7、6位指明Tag的类型，00表示UniversalTag类型;<br />
+5位指明该类型以primitive方式编码还是constructed方式编码；<br />
+因此SEQUENCE、SET类型Tag对应16(0x10)、17(0x11)将编码为0x30、0x31<br />
+4~0位指明对应的UniversalTag类型（值是0-30）：注意这里的30是十进制。</p>
+
+<p>ASN.1中定义的UNIVERSAL类Tag</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Tag</th>
+      <th style="text-align: left">16进制编码</th>
+      <th style="text-align: left">类型</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">0</td>
+      <td style="text-align: left">0x00</td>
+      <td style="text-align: left">BER保留</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">1</td>
+      <td style="text-align: left">0x01</td>
+      <td style="text-align: left">BOOLEAN</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">2</td>
+      <td style="text-align: left">0x02</td>
+      <td style="text-align: left">INTEGER</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">3</td>
+      <td style="text-align: left">0x03</td>
+      <td style="text-align: left">BIT STRING</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">4</td>
+      <td style="text-align: left">0x04</td>
+      <td style="text-align: left">OCTET STRING</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">5</td>
+      <td style="text-align: left">0x05</td>
+      <td style="text-align: left">NULL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">6</td>
+      <td style="text-align: left">0x06</td>
+      <td style="text-align: left">OBJECT IDENTIFIER</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">7</td>
+      <td style="text-align: left">0x07</td>
+      <td style="text-align: left">ObjectDescripion</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">8</td>
+      <td style="text-align: left">0x08</td>
+      <td style="text-align: left">EXTERNAL,INSTANCE OF</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">9</td>
+      <td style="text-align: left">0x09</td>
+      <td style="text-align: left">REAL</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">10</td>
+      <td style="text-align: left">0x0A</td>
+      <td style="text-align: left">ENUMERATED</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">11</td>
+      <td style="text-align: left">0x0B</td>
+      <td style="text-align: left">EMBEDDED PDV</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">12</td>
+      <td style="text-align: left">0x0C</td>
+      <td style="text-align: left">UFT8String</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">13</td>
+      <td style="text-align: left">0x0D</td>
+      <td style="text-align: left">RELATIVE-OID</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">14</td>
+      <td style="text-align: left">0x0E</td>
+      <td style="text-align: left">保留</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">15</td>
+      <td style="text-align: left">0x0F</td>
+      <td style="text-align: left">保留</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">16</td>
+      <td style="text-align: left">0x30</td>
+      <td style="text-align: left">SEQUENCE,SEQUENCE OF</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">17</td>
+      <td style="text-align: left">0x31</td>
+      <td style="text-align: left">SET,SET OF</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">18</td>
+      <td style="text-align: left">0x12</td>
+      <td style="text-align: left">NumericString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">19</td>
+      <td style="text-align: left">0x13</td>
+      <td style="text-align: left">PrintableString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">20</td>
+      <td style="text-align: left">0x14</td>
+      <td style="text-align: left">TeletexString,T61String</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">21</td>
+      <td style="text-align: left">0x15</td>
+      <td style="text-align: left">VideotexString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">22</td>
+      <td style="text-align: left">0x16</td>
+      <td style="text-align: left">IA5String</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">23</td>
+      <td style="text-align: left">0x17</td>
+      <td style="text-align: left">UTCTime</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">24</td>
+      <td style="text-align: left">0x18</td>
+      <td style="text-align: left">GeneralizedTime</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">25</td>
+      <td style="text-align: left">0x19</td>
+      <td style="text-align: left">GraphicString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">26</td>
+      <td style="text-align: left">0x1A</td>
+      <td style="text-align: left">VisibleString,ISO646String</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">27</td>
+      <td style="text-align: left">0x1B</td>
+      <td style="text-align: left">GeneralString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">28</td>
+      <td style="text-align: left">0x1C</td>
+      <td style="text-align: left">UniversalString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">29</td>
+      <td style="text-align: left">0x1D</td>
+      <td style="text-align: left">CHARACTER STRING</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">30</td>
+      <td style="text-align: left">0x1E</td>
+      <td style="text-align: left">BMPString</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">31</td>
+      <td style="text-align: left">0x1F</td>
+      <td style="text-align: left">保留</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="2length">2.Length</h3>
+<p>BER编码中Length表示Value部分所占八位组的个数<br />
+有两大类：定长方式（DefiniteForm）和不定长方式（IndefiniteForm）</p>
+
+<p>(1).定长方式</p>
+
+<p>定长方式中，按长度是否超过127（则7个位的存储范围），分为短、长两种形式（则用第8位来区分）：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">实际长度</th>
+      <th style="text-align: left">Tag</th>
+      <th style="text-align: left">Length4Length</th>
+      <th style="text-align: left">Length</th>
+      <th style="text-align: left">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">0~127</td>
+      <td style="text-align: left">Tag</td>
+      <td style="text-align: left">NULL</td>
+      <td style="text-align: left">0x00~0x7F</td>
+      <td style="text-align: left">Value</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">128~256^126-1</td>
+      <td style="text-align: left">Tag</td>
+      <td style="text-align: left">0x80+n</td>
+      <td style="text-align: left">n个Length</td>
+      <td style="text-align: left">Value</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>判断方式：第一个Length的最高位是否为1<br />
+Example:<br />
+Length(1196==0x04AC)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Length4Length</th>
+      <th style="text-align: left">Length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">0x82</td>
+      <td style="text-align: left">0x04 0xAC</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>(2).不定长方式</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Tag</th>
+      <th style="text-align: left">Length</th>
+      <th style="text-align: left">Value</th>
+      <th style="text-align: left">End</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Tag</td>
+      <td style="text-align: left">0x80</td>
+      <td style="text-align: left">Value</td>
+      <td style="text-align: left">0x00 0x00</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Length所在八位组固定编码为0x80，但在Value编码结束后以两个0x00结尾。这种方式使得可以在编码没有完全结束的情况下，可以先发送部分消息给对方。</p>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=ASN.1编码规则@&amp;url=http://localhost:4000/nycko-pages/c++/ASN1Format.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/ASN1Format.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/ASN1Format.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/mysql.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Mysql学习笔记</title>
+  <meta name="description" content="根据史上最简单的 MySQL 教程学习MySQL，在此摘录自己的笔记">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">Mysql学习笔记</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="17 May 2018" itemprop="datePublished">May 17 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">Common</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">sql</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>个人学习笔记/备忘</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <p>根据<a href="https://blog.csdn.net/qq_35246620/article/details/70823903">史上最简单的 MySQL 教程</a>学习MySQL，在此摘录自己的笔记</p>
+
+<h1 id="安装centos7">安装(centos7)</h1>
+<ul>
+  <li>wget http://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm</li>
+  <li>yum localinstall mysql57-community-release-el7-9.noarch.rpm</li>
+  <li>yum install mysql-community-server</li>
+  <li>service mysqld start</li>
+  <li>修改临时密码<br />
+为了加强安全性，MySQL5.7为root用户随机生成了一个密码，在error log中，关于error log的位置，如果安装的是RPM包，则默认是/var/log/mysqld.log，只有启动过一次mysql才可以查看临时密码：<br />
+grep ‘temporary password’ /var/log/mysqld.log<br />
+复制对应字段</li>
+  <li>mysql -u root -p<br />
+然后粘贴刚才的密码</li>
+  <li>马上修改密码：<br />
+ALTER USER ‘root’@’localhost’ IDENTIFIED BY ‘newpasswd’;</li>
+  <li>如果新密码太简单，修改安全强度和长度，再重新执行上一行命令<br />
+mysql&gt; set global validate_password_policy=0;<br />
+mysql&gt; set global validate_password_length=1;</li>
+  <li>最基础的sql安装到此结束</li>
+</ul>
+
+<h1 id="概念">概念</h1>
+<ul>
+  <li>一般来说，将 MySQL 数据库服务器的内部对象分为四层，分别为：数据管理系统（DBMS）–&gt; 数据库（DB）–&gt; 表（Table）–&gt; 字段（Filed）</li>
+</ul>
+
+<h1 id="命令">命令</h1>
+<p>https://www.runoob.com/sql/sql-syntax.html</p>
+
+<h3 id="基础命令">基础命令</h3>
+<ul>
+  <li>登陆：mysql -hPup
+-h，主机地址，本地为localhost，远程为IP地址<br />
+-P，端口号，用来找软件<br />
+-u，用户名<br />
+-p，密码</li>
+  <li>show … like …<br />
+show databases [like ‘pattern’];<br />
+show tables [like ‘pattern’];<br />
+show collation;</li>
+</ul>
+
+<h3 id="库操作">库操作</h3>
+<ul>
+  <li>show databases [like ‘pattern’];<br />
+pattern为匹配模式：<br />
+%匹配多个字符<br />
+_匹配单个字符，所以匹配的名称有_时需要用_转义<br />
+如show databases like ‘%abc’;表示匹配所有以abc结尾的库</li>
+  <li>create database + 数据库名称 + [库选项];<br />
+选项为空默认即可，当业务上需要用到这些特性时在去搜索那个库选项合适</li>
+  <li>drop database + 数据库名称;</li>
+  <li>查看表的创建语句：show create table my_auto;</li>
+</ul>
+
+<h3 id="表操作">表操作</h3>
+<ul>
+  <li>show tables [like ‘pattern’];<br />
+pattern为匹配模式：<br />
+%匹配多个字符<br />
+_匹配单个字符，所以匹配的名称有_时需要用_转义<br />
+如show tables like ‘%abc’;表示匹配所有以abc结尾的表</li>
+  <li>复制表create table + 表名 + like + [数据库名(当前可省).]表名;</li>
+  <li>show columns from + 表名;</li>
+  <li>create table [if not exists] + tblname(lowName type,lowName type)[表选项];<br />
+选项为空默认即可，当业务上需要用到这些特性时在去搜索那个表选项合适</li>
+  <li>rename table 旧表名 to 新表名;</li>
+  <li>drop table + 表1, 表2 … ;</li>
+  <li>新增字段，基本语法：alter table + 表名 + add + [column] + 字段名 + 数据类型 + [列属性][位置]; <br />
+其中，位置表示此字段存储的位置，分为first（第一个位置）和after + 字段名（指定的字段后，默认为最后一个位置）.<br />
+示例：alter table student add column id int first;</li>
+  <li>修改字段，基本语法：alter table + 表名 + modify + 字段名 + 数据类型 + [列属性][位置];</li>
+  <li>重命名字段，基本语法：alter table + 表名 + change + 旧字段名 + 新字段名 + 数据类型 + [列属性][位置];</li>
+  <li>删除字段，基本语法：alter table + 表名 + drop+ 字段名;</li>
+</ul>
+
+<h3 id="数据操作">数据操作</h3>
+<ul>
+  <li>增：insert into + 表名(字段列表) + values(值列表);</li>
+  <li>复制，可以自己复制自己，来做指数复制(蠕虫复制，用于压力测试)：<br />
+insert into my_copy select * from my_copy;</li>
+  <li>更新主键，当主键已经存在，新增一条数据将报错，可以使用replace 代替insert</li>
+  <li>减：delete from test where grade = ‘3.1’ [limit cnt];</li>
+  <li>改：update + 表名 + set + 字段 = 值 + [where 条件] [limit cnt];</li>
+  <li>查：select + 字段名称[,字段名称] + from + 表名 + [where 条件];</li>
+  <li>
+    <ul>
+      <li>查询 + 排序：order by + 字段名 + [asc升(默认)/desc降];<br />
+如：select [all(默认，可省)/distinct去重]* from tableName order by name;</li>
+    </ul>
+  </li>
+  <li>
+    <ul>
+      <li>where可以用：<br />
+比较运算符：&gt;、&lt;、&gt;=、&lt;=、&lt;&gt;、=、like、between and、in和not in；<br />
+逻辑运算符：&amp;&amp;、||、和!.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="校对集">校对集</h3>
+<p>影响排序，已有数据再修改校对集，则旧数据不会改变排序
+_bin：binary，二进制比较，区分大小写<br />
+_cs：case sensitive，大小写敏感，区分大小写<br />
+_ci：case insensitive，大小写不敏感，不区分大小写</p>
+
+<h3 id="数据类型">数据类型</h3>
+<p>http://www.runoob.com/mysql/mysql-data-types.html</p>
+<ul>
+  <li>注意任何一条记录最长不超过 65535 个字节，而且varchar的最大长度由编码字符集决定（编码集决定一个字符占几个字节，不一定是65535的倍数）</li>
+</ul>
+
+<h3 id="列属性">列属性</h3>
+<p>比较实用的：</p>
+<ul>
+  <li>comment，仅仅提供给开发人员看的备注<br />
+create table tblName(name varchar(20) comment ‘姓名’)charset utf8;</li>
+  <li>default，默认值,insert时，如果不设置该列，则使用默认值
+create table tblName(name varchar(20) default ‘nycko’)charset utf8;</li>
+  <li>auto_increment，自动增长，必须与键一起用，则，该列需要是一个索引，列的key属性有值<br />
+create table my_auto(
+  id int primary key auto_increment,
+  name varchar(20) not null
+)charset utf8;<br />
+给null时则触发自动增长，否则根据输入值，下一次则从前一个值+1
+insert into my_auto values(null,’Guo’);<br />
+改为自增长，只能修改成更大的值：alter table + 表名 + auto_increment = 值;<br />
+查看目前自增长情况：show variables like ‘auto_increment%’;
+修改步长：set auto_increment_increment = 值;<br />
+删除自增长属性：alter table my_auto modify id int</li>
+</ul>
+
+<h3 id="键">键</h3>
+<ul>
+  <li>primary key，主键，一个table只能有一列使用，该列不能重复<br />
+create table my_pri1(
+  name varchar(20) not null comment ‘姓名’,
+  number char(10) primary key comment ‘学号’
+)charset utf8;</li>
+  <li>复合主键
+create table my_pri2(
+  number char(10) not null comment ‘学号’,
+  course char(10) not null comment ‘课程编号’,
+  score tinyint unsigned default 60,
+  – 增加主键限制，知道学号再知道课程编号才能确定唯一的分数值，具有唯一性
+  primary key(number,course)
+)charset utf8;</li>
+  <li>
+    <p>某列（已有数据不重复的列）改为主键
+alter table my_pri3 add primary key(course);</p>
+  </li>
+  <li>unique或者unique key，唯一键，其实就是允许为空的“主键”，以下两行等价<br />
+create table my_unique2(number char(10) not null,name varchar(20) not null,unique key(number))charset utf8;
+create table my_unique2(number char(10) not null primary key,name varchar(20) not null)charset utf8;</li>
+  <li>某列（已有数据不重复的列）改为唯一
+alter table my_unique3 add unique key(number);</li>
+  <li>删除唯一键，并不会删除该列，只是删除属性
+alter table my_unique3 drop index number;</li>
+</ul>
+
+<h3 id="关系">关系</h3>
+<p>一张表中一个字段经常与另一张表的某个(些)字段有关系，分为 3 种，分别为：一对一(1:1)，一对多(1:N)（或多对一(N:1)）和多对多(N:N)<br />
+特别的，多对多一般使用中间表来记录两张表之间的关系</p>
+
+<h3 id="范式">范式</h3>
+<p>https://blog.csdn.net/qq_35246620/article/details/72677626</p>
+<ul>
+  <li>第一范式要求字段的数据具有原子性，不可再分。则取出来的数据不需要拆分能直接参与运算</li>
+  <li>第二范式就是要解决表设计中不允许出现部分依赖。设置了复合主键，单某些字段只跟一个主键有关，其他主键无关，则部分依赖</li>
+  <li>第三范式就是要解决表设计中出现传递依赖的问题</li>
+</ul>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=Mysql学习笔记@&amp;url=http://localhost:4000/nycko-pages/c++/mysql.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/mysql.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/mysql.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

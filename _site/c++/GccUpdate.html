@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/GccUpdate.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>升级Gcc</title>
+  <meta name="description" content="虽然网上一捉一大把，但是遇到了点问题，这里自己记录以下mv /etc/yum.repos.d /etc/yum.repos.d.bakwget http://people.centos.org/tru/devtools-2/devtools-2.repomv devtools-2.repo /etc/yum.re...">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">升级Gcc</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="17 May 2018" itemprop="datePublished">May 17 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">Common</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>yum升级Gcc</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <p>虽然网上一捉一大把，但是遇到了点问题，这里自己记录以下</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mv /etc/yum.repos.d /etc/yum.repos.d.bak
+wget http://people.centos.org/tru/devtools-2/devtools-2.repo
+mv devtools-2.repo /etc/yum.repos.d
+yum install devtoolset-2-gcc devtoolset-2-binutils devtoolset-2-gcc-c++
+</code></pre></div></div>
+<p>最后一步yum install可能会遇到repo文件有问题，跟环境变量应该有关系
+devtools-2.repo：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=升级Gcc@&amp;url=http://localhost:4000/nycko-pages/c++/GccUpdate.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/GccUpdate.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/GccUpdate.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

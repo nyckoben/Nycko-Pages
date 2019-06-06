@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/Grpc.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>开源项目--Grpc</title>
+  <meta name="description" content="简述Grpc官方链接本人毕业接触的第一个服务器项目就是基于Grpc的，当时还不是特别懂，而最近搭建了一个基于sofa-pbrpc的服务器，这样对比下来，发现Grpc的开发体验还是比较好的，当然也许pbrpc也有自己的优势，如profiling功能。但是最终还是没有逃过多语言开发的问题，pbrpc官方提供了C++版...">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">开源项目--Grpc</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="17 May 2018" itemprop="datePublished">May 17 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">Common</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>Grpc学习/使用笔记</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <h1 id="简述grpc">简述Grpc</h1>
+<p><a href="https://grpc.io/">官方链接</a><br />
+本人毕业接触的第一个服务器项目就是基于Grpc的，当时还不是特别懂，而最近搭建了一个基于<a href="https://github.com/baidu/sofa-pbrpc">sofa-pbrpc</a>的服务器，这样对比下来，发现Grpc的开发体验还是比较好的，当然也许pbrpc也有自己的优势，如<a href="https://github.com/baidu/sofa-pbrpc/wiki/Profiling%E5%8A%9F%E8%83%BD">profiling功能</a>。<br />
+但是最终还是没有逃过多语言开发的问题，pbrpc官方提供了C++版本以及python示例，而Grpc基本覆盖了常用语言包括C++/Java/Python/C#/Ruby/Go/Js/PHP等等<br />
+原本打算利用Jni技术提供pbrpc给Java，但是又遇到了pbrpc官方不支持windows编译的问题，当然建立vsproj修改一下代码也能解决，但是觉得没必要这样折腾，于是近日尝试着快速用Grpc替换pbrpc，同时做下笔记。</p>
+
+<h1 id="环境">环境</h1>
+<p>我一开始的工作环境是CentOS6.5，实属公司历史遗留问题，对应的gcc4.4.7/glibc2.12，不支持c++11等，当然你可以升级，gcc升级还搞得定，glibc升级实在痛苦，所以坚持要求新服务器版本提升到<a href="http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-DVD-1804.iso">CentOS7</a>，如此一来各种第三方库的源码安装基本不会遇到什么问题了</p>
+
+<h1 id="源码编译安装grpc">源码编译安装grpc</h1>
+<p>由于国内网速问题，我都是直接下载github的zip的，而不会使用git下载，我自己觉得会比较快<br />
+以下暂时简单记录大概过程，日后遇到新问题，更新记录</p>
+<ul>
+  <li>下载grpc源码</li>
+  <li>手动下载thirdparty下各第三方仓库源码，解压到本地对应目录</li>
+  <li>linux编译不会出现什么问题，如果出错，查看输出处理就好</li>
+  <li>windows编译需要使用cmake创建vsproj，其中可能遇到一些错误，而我只缺perl，下载一个strawberryperl，配置好cmake路径即可</li>
+  <li>vsproj创建出来直接生成所有项目基本不会有问题</li>
+  <li>编译运行example中的helloworld工程，linux上直接make即可</li>
+  <li>本人需要在linux上搭建服务器，linux和windows上都开发客户端<br />
+所以在windows上，新建独立vs工程<br />
+代码只需要拷贝出xxxClient.cc以及protoc编译出的4个文件(linux上编译的即可)<br />
+由于vs工程的缘故，需要处理一下预编译头的问题<br />
+然后先点击生成，根据编译错误，添加各种头文件以及库的路径，最终我是需要添加<br />
+库：zlibd.lib crypto.lib ssl.lib gpr.lib grpc.lib grpc++.lib libprotobufd.lib<br />
+包含路径：.\third_party\protobuf\src  和 .\include<br />
+编译通过后运行，zlib是动态库需要把zlib.dll放到exe当前目录，当然也可以进一步处理把zlib做成静态库</li>
+  <li>确保网络通畅（能ping能telnet）后，顺利通过测试</li>
+  <li>仿照helloworld测试工程构建自己的linux上服务器和客户端工程，可以直接利用其makefile，例如其makefile将对protobuf版本进行判断，以免由于版本问题导致比较难发现的问题</li>
+  <li>仿照上述helloworld的vs工程，构建windows客户端工程</li>
+  <li>以上基本就是grpc入门搭建环境以及搭建第一个工程的过程</li>
+</ul>
+
+<h1 id="protobuf">protobuf</h1>
+
+<h1 id="grpc-c">grpc-c++</h1>
+
+<h1 id="grpc-other-language">grpc-other-language</h1>
+<p>官网做的还是挺不错的，各家语言的guide都键全，概念和代码逻辑基本是一样的，主要是开发环境的搭建<br />
+本人主要折腾c++，而且为了不维护多份代码，使用c/c++开发，通过如jni等技术提供给java(其他语言)调用也未尝不是一件好事，所以这里暂时不介绍其他语言<br />
+当时折腾java版本由于一些依赖关系没有设置好，所以没有成功，理论上使用MAVEN项目应该不难</p>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=开源项目--Grpc@&amp;url=http://localhost:4000/nycko-pages/c++/Grpc.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/Grpc.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/Grpc.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

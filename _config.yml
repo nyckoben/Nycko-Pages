@@ -1,106 +1,19 @@
-title:            nycko
-description:      I'm Nycko
+# Site settings
+title: Nycko Blog
+name: Nycko Blog # your name
+email: nycko@sina.com # your email address
+description: >
+    A Simple Jekyll Blog Theme. # this means to ignore newlines until "baseurl:"
+baseurl: "/nycko-pages" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+twitter_username: # your Twitter username
+github_username: # your Github username
+disqus_username: # your disqus username
 
-# put your disqus here
-disqus_shortname:
-reading_time:     true # if true, shows the estimated reading time for a post
-words_per_minute: 200
-logo:             images/logo.png # logo visible in the topbar
-excerpt_separator: <!--more-->
-# Your site's domain goes here (eg: //mmistakes.github.io, http://mademistakes.com, etc)
-# When testing locally leave blank or use http://localhost:4000
+google-analytics: # add it if you have one
 
-url: https://nyckoben.github.io/Nycko-Pages
+skillstree: true # turn on or off the skills tree in about page
 
-# draw your top menu here
-# each item must have a title and a url.
-#   To list post categories. use type: 'categories'
-#   To create sub categories. add a submenu item
-# See the example
-menu:
-  - title: 'Home'
-    url: '/'
-  # - title: 'Fork'
-  #   url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme'
-  # - title: 'Install'
-  #   url: 'http://github.com/aron-bordin/neo-hpstr-jekyll-theme#installation'
-  - title: 'Tags'
-    url: '/tags'
-  - title: 'Categories'
-    url: '/categories'
-    type: 'categories'
-  # - title: 'Favorites'
-  #   url: '#'
-    # submenu:
-    #   - title: 'Code Highlighter'
-    #     url: '/intro/code-highlighting-post/'
-    #   - title: 'Sample Post'
-    #     url: '/intro/sample-post/'
-
-# Owner/author information
-owner:
-  name:           Nycko
-  site:           https://github.com/nyckoben/Nycko-Pages
-  avatar:         images/avatar.jpg
-  bio:            "C/C++攻城狮 爱生活 爱折腾"
-  email:          nycko@sina.com
-  # Twitter nick for use in Twitter cards and follow button.
-  # twitter: aron_bordin # if no twitter in this config, the twitter follow button will be removed
-  # GitHub nick for use in follow button in author block.
-  github: https://github.com/nyckoben/
-
-# Twitter account associated with the site if different from owner/author twitter account.
-# Used in Twitter cards.
-twitter:
-
-# Social networking links used in author block underneath posts. Update and remove as you like.
-social:
-  - title: "github"
-    url: "https://github.com/nyckoben/"
-  # - title: "linkedin"
-  #   url: "https://br.linkedin.com/in/aronbordin"
-  # - title: "youtube"
-  #   url: "https://www.youtube.com/channel/UCfnSek-9HPWOx5e2pH7VFgg"
-
-# Background image to be tiled on all pages
-background:
-
-# Analytics and webmaster tools stuff goes here
-google_analytics:
-google_verify:
-# https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
-bing_verify:
-
-# http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-timezone:    America/New_York
-locale:      en_US
-future:      true
-highlighter: rouge
-markdown:    kramdown
-sass:
-  sass_dir: _sass
-  style: compressed
-
-# https://github.com/mojombo/jekyll/wiki/Permalinks
-permalink:   /:categories/:title/
-
-# Amount of post to show on home page
-paginate: 5
-
-# if true, shows the floatting share buttons
-float_share: 
-
-# Octopress
-# Default extensions
-post_ext: md
-page_ext: md
-# Found in _templates/
-post_layout: post
-page_layout: page
-# Format titles with titlecase?
-titlecase: true
-
-include: [".htaccess"]
-exclude: ["demo/*", "lib", "config.rb", "Capfile", "config", "Gemfile", "Gemfile.lock", "README.md", "LICENSE", "log", "Rakefile", "Rakefile.rb", "tmp", "less", "*.sublime-project", "*.sublime-workspace", "test", "spec", "Gruntfile.js", "package.json", "node_modules"]
-gems: [jekyll-paginate]
-theme: neo-hpstr-jekyll-theme
+# Build settings
+permalink: none
+markdown: kramdown

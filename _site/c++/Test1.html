@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/Test1.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>C++ 默认参数与继承产生的有趣现象</title>
+  <meta name="description" content="题目直入正题，前几天公司提薪需要经过一个考试网站的考核，遇到一道题，还原一下有兴趣的可以认真思考一下，以下代码输出的结果是什么代码链接```cpp#include using namespace std;">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">C++ 默认参数与继承产生的有趣现象</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="18 Jan 2018" itemprop="datePublished">Jan 18 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">编译</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>默认参数在编译阶段确定，函数的版本在运行时确定</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <h2 id="题目">题目</h2>
+<p>直入正题，前几天公司提薪需要经过一个考试网站的考核，遇到一道题，还原一下<br />
+有兴趣的可以认真思考一下，以下代码输出的结果是什么<br />
+<a href="https://gitee.com/nycko/Nycko-Pages/tree/master/PageSrc/Test1">代码链接</a></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;iostream&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="k">class</span> <span class="nc">A</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"A : "</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">B</span><span class="o">:</span><span class="k">public</span> <span class="n">A</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"B : "</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">A</span> <span class="n">a</span><span class="p">;</span>
+    <span class="n">B</span> <span class="n">b</span><span class="p">;</span>
+    <span class="n">A</span> <span class="o">*</span><span class="n">pA</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">;</span>
+    <span class="n">a</span><span class="p">.</span><span class="n">print</span><span class="p">();</span>
+    <span class="n">b</span><span class="p">.</span><span class="n">print</span><span class="p">();</span>
+    <span class="n">pA</span><span class="o">-&gt;</span><span class="n">print</span><span class="p">();</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+<h2 id="答案">答案</h2>
+<p>大家可以先试着思考一下为什么，我当时是真心没有想出个所以然，然后搜索关键字估计不对也没找到，后来问了老工程师，讲解了好久才知道了是编译时候发生的事，但是也半天才能接受过来这个解释</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">A</span> <span class="o">:</span> <span class="mi">10</span>
+<span class="n">B</span> <span class="o">:</span> <span class="mi">20</span>
+<span class="n">B</span> <span class="o">:</span> <span class="mi">10</span>
+</code></pre></div></div>
+
+<h2 id="我的最终理解">我的最终理解</h2>
+<p>想必很多人都这样想，打印的结果一定是”A : 10”或者”B : 20”。觉得这道题的考点应该在，子类地址赋值给基类后，运行的是谁的版本。然而我错了</p>
+<ul>
+  <li>以下是我最后的理解，不担保一定正确</li>
+</ul>
+
+<p>一句话总结就是：默认参数是编译时确定的，函数地址（运行哪个版本）是运行时确定的！<br />
+这里牵涉到两个关键词：动态联编、虚函数表<br />
+我也是学习中，就不贴概念理论了，大家可以百度一下<br />
+子类重写基类的虚函数时，其实对虚函数表中，对应的函数地址做了覆盖，也就是说，用子类自己的函数地址覆盖了原本的位置。如此，当运行以下语句时，调用的则是子类中版本。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pA</span><span class="o">-&gt;</span><span class="n">print</span><span class="p">();</span>
+</code></pre></div></div>
+<p>然后为什么默认参数缺用了基类的版本呢？是因为这个默认参数是在编译时确定的，也就是说，被认为类型为A的对象（不管是原本就是A，还是指向子类B的父类指针A*）他的默认参数都将使用a=10。这个是在编译阶段，编译器检测到该语句时就确认的。<br />
+个人意淫这个过程：啊咧？这里有个A要调用print，还不带参数，朕恩赐你一个默认参数吧，你是A，就给你10。而编译器并不知道运行时这个pA其实来自于B类型的b对象。</p>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=C++ 默认参数与继承产生的有趣现象@&amp;url=http://localhost:4000/nycko-pages/c++/Test1.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/Test1.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/Test1.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/GmSsl-SM2.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Gmssl实现SM2签名验签</title>
+  <meta name="description" content="官方资料GmsslGmSsl的EVP接口">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">Gmssl实现SM2签名验签</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="16 May 2018" itemprop="datePublished">May 16 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">PKI</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">GmSsl</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>包括SM3WithSM2摘要流程，SM2签名，SM2验签</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <h1 id="官方资料">官方资料</h1>
+<p><a href="http://gmssl.org/">Gmssl</a><br />
+<a href="http://gmssl.org/docs/evp-api.html">GmSsl的EVP接口</a></p>
+
+<h1 id="个人经历">个人经历</h1>
+<ul>
+  <li>官方做签名时虽然EVP_PKEY结构体可以适配SM2，但是示例用EVP_sha256()作为摘要算法，顺利避开了SM3WithSM2的问题。（刚接触SM2/SM3的朋友可能不太知道问题在哪，下面会说到）</li>
+  <li>那么，SM2结合SM3的代码应该怎么写。第一时间当然是使用网站上的示例，修改EVP_sha256()为EVP_sm3()，这样代码可以兼容SM2和RSA的签名验签了，但是这样坐下来，发现我可以自签自验，但是无法验证第三方签名。</li>
+  <li>忽略查源码，查资料的过程，我发现这一套EVP接口内部并没有帮我做SM3WithSM2的摘要，只是单纯的SM3。(<a href="https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/doc/SM2%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E4%BD%BF%E7%94%A8%E8%A7%84%E8%8C%83.pdf">请查阅8.1/8.2</a>)</li>
+  <li>我一直以为EVP接口内部将能帮我实现这部分内容，然而…… 进而我查阅源码发现test文件夹（哎~发现得有点晚）里面就有相关代码。test\sm2test.c : test_sm2_sign</li>
+</ul>
+
+<h1 id="个人代码以及解释">个人代码以及解释</h1>
+<p>源码中test里的代码其实够用了，但是一下贴一下本人的版本，主要是为了讲解一下SM3WithSM2的摘要流程，所以copy了test代码，写一个比较精简的示例(<a href="https://github.com/nyckoben/Nycko-Pages/blob/master/PagesSrc/GmSsl/sm2Test.cc">代码链接</a>)<br />
+编译命令,注意ssl指gmssl的动态库<br />
+g++ -o test sm2Test.cc -lssl</p>
+
+<ul>
+  <li>普通SM3摘要
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">hashForSM3</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">clearText</span><span class="p">,</span> <span class="kt">int</span> <span class="n">clearTextLen</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">sm3Data</span><span class="p">){</span>  
+  <span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>  
+  <span class="c1">//初始化摘要结构体   </span>
+  <span class="n">EVP_MD_CTX</span> <span class="o">*</span><span class="n">mdctx</span> <span class="o">=</span> <span class="n">EVP_MD_CTX_create</span><span class="p">();</span>  
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">mdctx</span><span class="p">)</span>   
+      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="n">EVP_MD_CTX_init</span><span class="p">(</span><span class="n">mdctx</span><span class="p">);</span> 
+    
+  <span class="c1">//设置摘要算法和密码算法引擎</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">EVP_DigestInit_ex</span><span class="p">(</span><span class="n">mdctx</span><span class="p">,</span> <span class="n">EVP_sm3</span><span class="p">(),</span> <span class="nb">NULL</span><span class="p">))</span>   
+      <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+    
+  <span class="c1">//输入原文clearText</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">EVP_DigestUpdate</span><span class="p">(</span><span class="n">mdctx</span><span class="p">,</span><span class="n">clearText</span><span class="p">,</span> <span class="n">clearTextLen</span><span class="p">))</span> 
+      <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+    
+  <span class="c1">//输出摘要值，外部判断ret是否为32作为成功条件</span>
+  <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">EVP_DigestFinal</span><span class="p">(</span><span class="n">mdctx</span><span class="p">,</span> <span class="n">sm3Data</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ret</span><span class="p">))</span>
+      <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+<span class="n">ERR</span><span class="o">:</span>
+  <span class="n">EVP_MD_CTX_destroy</span><span class="p">(</span><span class="n">mdctx</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>SM3WithSM2流程
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">hashForSM3WithSM2</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">clearText</span><span class="p">,</span> <span class="kt">int</span> <span class="n">clearTextLen</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">puk</span><span class="p">,</span> <span class="kt">int</span> <span class="n">pukLen</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">sm3Data</span><span class="p">){</span>
+  <span class="c1">//以下为国密标准推荐参数，id="1234567812345678"，长度是128bit则0x0080</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">sm2_par_dig</span><span class="p">[</span><span class="mi">210</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="c1">//idlen[2]+id[16]+parm[128]+puk[64]</span>
+      <span class="mh">0x00</span><span class="p">,</span><span class="mh">0x80</span><span class="p">,</span>
+      <span class="mh">0x31</span><span class="p">,</span><span class="mh">0x32</span><span class="p">,</span><span class="mh">0x33</span><span class="p">,</span><span class="mh">0x34</span><span class="p">,</span><span class="mh">0x35</span><span class="p">,</span><span class="mh">0x36</span><span class="p">,</span><span class="mh">0x37</span><span class="p">,</span><span class="mh">0x38</span><span class="p">,</span><span class="mh">0x31</span><span class="p">,</span><span class="mh">0x32</span><span class="p">,</span><span class="mh">0x33</span><span class="p">,</span><span class="mh">0x34</span><span class="p">,</span><span class="mh">0x35</span><span class="p">,</span><span class="mh">0x36</span><span class="p">,</span><span class="mh">0x37</span><span class="p">,</span><span class="mh">0x38</span><span class="p">,</span>
+      <span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFE</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span>
+      <span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0x00</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFF</span><span class="p">,</span><span class="mh">0xFC</span><span class="p">,</span>
+      <span class="mh">0x28</span><span class="p">,</span><span class="mh">0xE9</span><span class="p">,</span><span class="mh">0xFA</span><span class="p">,</span><span class="mh">0x9E</span><span class="p">,</span><span class="mh">0x9D</span><span class="p">,</span><span class="mh">0x9F</span><span class="p">,</span><span class="mh">0x5E</span><span class="p">,</span><span class="mh">0x34</span><span class="p">,</span><span class="mh">0x4D</span><span class="p">,</span><span class="mh">0x5A</span><span class="p">,</span><span class="mh">0x9E</span><span class="p">,</span><span class="mh">0x4B</span><span class="p">,</span><span class="mh">0xCF</span><span class="p">,</span><span class="mh">0x65</span><span class="p">,</span><span class="mh">0x09</span><span class="p">,</span><span class="mh">0xA7</span><span class="p">,</span>
+      <span class="mh">0xF3</span><span class="p">,</span><span class="mh">0x97</span><span class="p">,</span><span class="mh">0x89</span><span class="p">,</span><span class="mh">0xF5</span><span class="p">,</span><span class="mh">0x15</span><span class="p">,</span><span class="mh">0xAB</span><span class="p">,</span><span class="mh">0x8F</span><span class="p">,</span><span class="mh">0x92</span><span class="p">,</span><span class="mh">0xDD</span><span class="p">,</span><span class="mh">0xBC</span><span class="p">,</span><span class="mh">0xBD</span><span class="p">,</span><span class="mh">0x41</span><span class="p">,</span><span class="mh">0x4D</span><span class="p">,</span><span class="mh">0x94</span><span class="p">,</span><span class="mh">0x0E</span><span class="p">,</span><span class="mh">0x93</span><span class="p">,</span>
+      <span class="mh">0x32</span><span class="p">,</span><span class="mh">0xC4</span><span class="p">,</span><span class="mh">0xAE</span><span class="p">,</span><span class="mh">0x2C</span><span class="p">,</span><span class="mh">0x1F</span><span class="p">,</span><span class="mh">0x19</span><span class="p">,</span><span class="mh">0x81</span><span class="p">,</span><span class="mh">0x19</span><span class="p">,</span><span class="mh">0x5F</span><span class="p">,</span><span class="mh">0x99</span><span class="p">,</span><span class="mh">0x04</span><span class="p">,</span><span class="mh">0x46</span><span class="p">,</span><span class="mh">0x6A</span><span class="p">,</span><span class="mh">0x39</span><span class="p">,</span><span class="mh">0xC9</span><span class="p">,</span><span class="mh">0x94</span><span class="p">,</span>
+      <span class="mh">0x8F</span><span class="p">,</span><span class="mh">0xE3</span><span class="p">,</span><span class="mh">0x0B</span><span class="p">,</span><span class="mh">0xBF</span><span class="p">,</span><span class="mh">0xF2</span><span class="p">,</span><span class="mh">0x66</span><span class="p">,</span><span class="mh">0x0B</span><span class="p">,</span><span class="mh">0xE1</span><span class="p">,</span><span class="mh">0x71</span><span class="p">,</span><span class="mh">0x5A</span><span class="p">,</span><span class="mh">0x45</span><span class="p">,</span><span class="mh">0x89</span><span class="p">,</span><span class="mh">0x33</span><span class="p">,</span><span class="mh">0x4C</span><span class="p">,</span><span class="mh">0x74</span><span class="p">,</span><span class="mh">0xC7</span><span class="p">,</span>
+      <span class="mh">0xBC</span><span class="p">,</span><span class="mh">0x37</span><span class="p">,</span><span class="mh">0x36</span><span class="p">,</span><span class="mh">0xA2</span><span class="p">,</span><span class="mh">0xF4</span><span class="p">,</span><span class="mh">0xF6</span><span class="p">,</span><span class="mh">0x77</span><span class="p">,</span><span class="mh">0x9C</span><span class="p">,</span><span class="mh">0x59</span><span class="p">,</span><span class="mh">0xBD</span><span class="p">,</span><span class="mh">0xCE</span><span class="p">,</span><span class="mh">0xE3</span><span class="p">,</span><span class="mh">0x6B</span><span class="p">,</span><span class="mh">0x69</span><span class="p">,</span><span class="mh">0x21</span><span class="p">,</span><span class="mh">0x53</span><span class="p">,</span>
+      <span class="mh">0xD0</span><span class="p">,</span><span class="mh">0xA9</span><span class="p">,</span><span class="mh">0x87</span><span class="p">,</span><span class="mh">0x7C</span><span class="p">,</span><span class="mh">0xC6</span><span class="p">,</span><span class="mh">0x2A</span><span class="p">,</span><span class="mh">0x47</span><span class="p">,</span><span class="mh">0x40</span><span class="p">,</span><span class="mh">0x02</span><span class="p">,</span><span class="mh">0xDF</span><span class="p">,</span><span class="mh">0x32</span><span class="p">,</span><span class="mh">0xE5</span><span class="p">,</span><span class="mh">0x21</span><span class="p">,</span><span class="mh">0x39</span><span class="p">,</span><span class="mh">0xF0</span><span class="p">,</span><span class="mh">0xA0</span><span class="p">,</span>
+      <span class="p">};</span>
+  <span class="c1">//对应规范pdf中的章节8.1</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">sm2_par_dig</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">16</span> <span class="o">+</span> <span class="mi">128</span><span class="p">,</span> <span class="n">puk</span><span class="p">,</span> <span class="n">pukLen</span><span class="p">);</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">sm3_e</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">unsigned</span> <span class="kt">char</span><span class="p">[</span><span class="mi">32</span> <span class="o">+</span> <span class="n">clearTextLen</span><span class="p">];</span>
+  <span class="k">if</span><span class="p">(</span><span class="mi">32</span> <span class="o">!=</span> <span class="n">hashForSM3</span><span class="p">(</span><span class="n">sm2_par_dig</span><span class="p">,</span> <span class="mi">210</span><span class="p">,</span> <span class="n">sm3_e</span><span class="p">)){</span>
+      <span class="k">delete</span><span class="p">[]</span> <span class="n">sm3_e</span><span class="p">;</span>
+      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span> 
+  <span class="c1">//对应规范pdf中的章节8.2</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="n">sm3_e</span> <span class="o">+</span> <span class="mi">32</span><span class="p">,</span> <span class="n">clearText</span><span class="p">,</span> <span class="n">clearTextLen</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="mi">32</span> <span class="o">!=</span> <span class="n">hashForSM3</span><span class="p">(</span><span class="n">sm3_e</span><span class="p">,</span> <span class="mi">32</span> <span class="o">+</span> <span class="n">clearTextLen</span><span class="p">,</span> <span class="n">sm3Data</span><span class="p">)){</span>
+      <span class="k">delete</span><span class="p">[]</span> <span class="n">sm3_e</span><span class="p">;</span>
+      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">delete</span><span class="p">[]</span> <span class="n">sm3_e</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>main函数
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">main</span><span class="p">(){</span>
+  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">BIO</span> <span class="o">*</span><span class="n">bio_pri</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">BIO</span> <span class="o">*</span><span class="n">bio_puk</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">EVP_PKEY</span> <span class="o">*</span><span class="n">pkey_pri</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">EC_KEY</span> <span class="o">*</span><span class="n">prikey</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">EVP_PKEY</span> <span class="o">*</span><span class="n">pkey_puk</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">EC_KEY</span> <span class="o">*</span><span class="n">pubkey</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="n">X509</span> <span class="o">*</span><span class="n">cert</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">puk</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">pukLen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">clearText</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="s">"nycko"</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">clearTextLen</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">((</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">clearText</span><span class="p">);</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">sm3Data</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+  <span class="kt">int</span> <span class="n">sm3DataLen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">out</span><span class="p">[</span><span class="mi">1024</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+  <span class="kt">int</span> <span class="n">outLen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="c1">///////////////////////////////////公钥相关结构</span>
+  <span class="n">bio_puk</span> <span class="o">=</span> <span class="n">BIO_new_file</span><span class="p">(</span><span class="s">"SM2Test.cer"</span><span class="p">,</span> <span class="s">"r"</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bio_puk</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="n">cert</span> <span class="o">=</span> <span class="n">d2i_X509_bio</span><span class="p">(</span><span class="n">bio_puk</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">cert</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="n">pkey_puk</span> <span class="o">=</span> <span class="n">X509_get_pubkey</span><span class="p">(</span><span class="n">cert</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pkey_puk</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="n">pubkey</span> <span class="o">=</span> <span class="n">EVP_PKEY_get0_EC_KEY</span><span class="p">(</span><span class="n">pkey_puk</span><span class="p">);</span><span class="c1">//don't free</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pubkey</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="c1">//要去除04标识</span>
+  <span class="n">pukLen</span> <span class="o">=</span> <span class="n">i2d_PublicKey</span><span class="p">(</span><span class="n">pkey_puk</span><span class="p">,(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">puk</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">puk</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="c1">///////////////////////////////////私钥相关结构</span>
+  <span class="n">bio_pri</span> <span class="o">=</span> <span class="n">BIO_new_file</span><span class="p">(</span><span class="s">"SM2Test.pem"</span><span class="p">,</span> <span class="s">"r"</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bio_pri</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="n">pkey_pri</span> <span class="o">=</span> <span class="n">PEM_read_bio_PrivateKey</span><span class="p">(</span><span class="n">bio_pri</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pkey_pri</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="n">prikey</span> <span class="o">=</span> <span class="n">EVP_PKEY_get0_EC_KEY</span><span class="p">(</span><span class="n">pkey_pri</span><span class="p">);</span><span class="c1">//don't free</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">prikey</span><span class="p">)</span> <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="c1">///////////////////////////////////sm3 sm2 sign/verify</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">hashForSM3WithSM2</span><span class="p">(</span><span class="n">clearText</span><span class="p">,</span> <span class="n">clearTextLen</span><span class="p">,</span> <span class="n">puk</span><span class="p">,</span> <span class="n">pukLen</span><span class="p">,</span> <span class="n">sm3Data</span><span class="p">))</span>
+      <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+    
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">SM2_sign</span><span class="p">(</span><span class="n">NID_undef</span><span class="p">,</span> <span class="n">sm3Data</span><span class="p">,</span> <span class="n">sm3DataLen</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">outLen</span><span class="p">,</span> <span class="n">prikey</span><span class="p">))</span> 
+      <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+
+  <span class="n">printf</span><span class="p">(</span><span class="s">"out[%d]:</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">outLen</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">outLen</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+  	<span class="n">printf</span><span class="p">(</span><span class="s">"%02x "</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">out</span> <span class="o">+</span> <span class="n">i</span><span class="p">));</span>
+  	<span class="k">if</span> <span class="p">((</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">16</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="n">i</span> <span class="o">==</span> <span class="n">outLen</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+  		<span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+  	<span class="p">}</span>
+  <span class="p">}</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="mi">1</span> <span class="o">!=</span> <span class="n">SM2_verify</span><span class="p">(</span><span class="n">NID_undef</span><span class="p">,</span> <span class="n">sm3Data</span><span class="p">,</span> <span class="n">sm3DataLen</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">outLen</span><span class="p">,</span> <span class="n">pubkey</span><span class="p">))</span> 
+      <span class="k">goto</span> <span class="n">ERR</span><span class="p">;</span>
+    
+  <span class="n">printf</span><span class="p">(</span><span class="s">"verify success</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="n">ERR</span><span class="o">:</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">puk</span><span class="p">)</span> <span class="n">OPENSSL_free</span><span class="p">(</span><span class="n">puk</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">bio_pri</span><span class="p">)</span> <span class="n">BIO_free_all</span><span class="p">(</span><span class="n">bio_pri</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">bio_puk</span><span class="p">)</span> <span class="n">BIO_free_all</span><span class="p">(</span><span class="n">bio_puk</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">pkey_pri</span><span class="p">)</span> <span class="n">EVP_PKEY_free</span><span class="p">(</span><span class="n">pkey_pri</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">pkey_puk</span><span class="p">)</span> <span class="n">EVP_PKEY_free</span><span class="p">(</span><span class="n">pkey_puk</span><span class="p">);</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span> <span class="n">X509_free</span><span class="p">(</span><span class="n">cert</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h1 id="代码中需要注意的小细节">代码中需要注意的小细节</h1>
+<ul>
+  <li>openssl的风格中，经常出现xxxget/xxxget0/xxxget1几个方法共存，如以上代码用到的<br />
+EVP_PKEY_get0_EC_KEY
+<a href="https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_get0_EC_KEY.html">官方doc</a>解释如下：</li>
+</ul>
+
+<p>EVP_PKEY_get1_EC_KEY() return the referenced key in pkey or NULL if the key is not of the correct type.<br />
+EVP_PKEY_get0_EC_KEY() also return the referenced key in pkey or NULL if the key is not of the correct type but the reference count of the returned key is not incremented and so must not be freed up after use.</p>
+
+<p>简单来说就是：EVP_PKEY_get0_EC_KEY不需要free，而EVP_PKEY_get1_EC_KEY需要，看看源码应该很容易区分原理，本人没有仔细研究，大概就是EVP_PKEY_get0_EC_KEY直接指向了EVP_PKEY中的EC_KEY，单独free掉EC_KEY会造成对EVP_PKEY进行free时出现double free</p>
+
+<ul>
+  <li>代码中出现
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">puk</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="n">pukLen</span> <span class="o">=</span> <span class="n">i2d_PublicKey</span><span class="p">(</span><span class="n">pkey_puk</span><span class="p">,(</span><span class="kt">unsigned</span> <span class="kt">char</span><span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">puk</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">OPENSSL_free</span><span class="p">(</span><span class="n">puk</span><span class="p">);</span><span class="c1">//普通缓冲区释放方法</span>
+</code></pre></div>    </div>
+  </li>
+  <li>这里取一个更有代表性的代码例子：
+    <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pvk</span> <span class="o">=</span> <span class="s">"your pvk pkcs1 data"</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pvk_tmp</span> <span class="o">=</span> <span class="n">pvk</span><span class="p">.</span><span class="n">value</span><span class="p">;</span>
+<span class="c1">//以下函数将会改变pvk_tmp的指向</span>
+<span class="c1">//d2i_PrivateKey第二个参数类型为EVP_PKEY**，传NULL可以内部new并作为返回值</span>
+<span class="n">EVP_PKEY</span><span class="o">*</span> <span class="n">pkey</span> <span class="o">=</span> <span class="n">d2i_PrivateKey</span><span class="p">(</span><span class="n">evpType</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pvk_tmp</span><span class="p">,</span> <span class="n">pvk</span><span class="p">.</span><span class="n">size</span><span class="p">);</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>这里常见两个问题：<br />
+1：openssl某些接口当传入NULL时，内部将为你分配内存，如以上的puk和pkey，你需要手动释放。<br />
+2：某些接口传入2级指针，很可能会改变指向，所以我习惯只要传二级指针都如上述代码的方法，用一个临时指针传入，免得原数据指针被改变，如d2i_PrivateKey就是我确认会改变指向的接口</p>
+
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=Gmssl实现SM2签名验签@&amp;url=http://localhost:4000/nycko-pages/c++/GmSsl-SM2.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/GmSsl-SM2.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/GmSsl-SM2.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>

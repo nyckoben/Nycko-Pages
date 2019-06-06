@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- CSS -->
+
+  <link rel="stylesheet" href="/nycko-pages/css/main.css">
+  <link rel="canonical" href="http://localhost:4000/nycko-pages/c++/Glog.html">
+  <link rel="alternate" type="application/rss+xml" title="Nycko Blog" href="http://localhost:4000/nycko-pages/feed.xml">
+
+<!-- Google font -->
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Noto Sans">
+
+<!-- font awesome -->
+
+<link rel="stylesheet" href="/css/font-awesome/css/font-awesome.min.css">
+
+</head>
+
+
+  
+
+  
+
+  </head>
+
+  <body>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>开源项目--Glog</title>
+  <meta name="description" content="目录  简述Glog  Glog使用示例  根据需求定制自己的Glog">
+</head>
+
+
+  <div class="wrapper">
+          <header class="post-header">
+
+    <center><div class="post-title" itemprop="name headline">开源项目--Glog</div>
+
+		<div class="post-meta"><i class="fa fa-calendar-o"></i> <time datetime="11 May 2018" itemprop="datePublished">May 11 2018</time>
+
+		
+		<br>
+		<i class="fa fa-eye"></i> <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-pulse"></i></span>˚C</span>
+	</div>
+
+        
+        <div class="post-tags">
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">Common</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">OpenSource</a>
+        
+		<a class="post-tags-item" href="http://localhost:4000/nycko-pages/tags/">C++</a>
+        
+	</div>
+    </center>
+    
+</header>
+
+<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<div class="post-content">
+    <center>
+	
+	<p>Glog的使用，以及一些本人定制过程</p>
+	
+    </center>
+	<h2>Directory</h2>
+</div>
+
+<div id="category"></div>
+
+<div class="post-content" itemprop="articleBody">
+    <h1 id="目录">目录</h1>
+<ul>
+  <li>简述Glog</li>
+  <li>Glog使用示例</li>
+  <li>根据需求定制自己的Glog</li>
+</ul>
+
+<h1 id="简述glog">简述Glog</h1>
+<p><a href="https://github.com/google/glog">GitHub链接</a><br />
+Glog是google的开源日志系统，我自己接触的第一个日志库就是Glog，习惯了，对于我一直以来的工作，我的应用程度上也没有什么缺点，反而有些我觉得很方便的地方，Glog的特性官方的描述我就不粘贴了，百度一大把，下面会结合一点实际场景说明我觉好用的地方</p>
+<ul>
+  <li>最简单的启用就直接一句话：google::InitGoogleLogging(“LogName”);</li>
+  <li>输出语句也很简单，自动补回车，自行加回车也不会输出一个空行，下面两句输出结果一致：<br />
+  LOG(INFO) « “abc”;<br />
+  LOG(INFO) « “abc\n”;</li>
+  <li>输出内容不需要调整的情况下，基本满足DEBUG需求，如带有文件名和行数:<br />
+  等级+日期 时间 PID 文件：行数<br />
+  I0514 15:52:26.102143 96944 common.cpp:59] 1a 1d 65 94 1a e2 f3 31</li>
+  <li>输出文件也方便，默认按照PID新建文件，携带新建时间，尤其方便的是会建立软链接到最新创建的日志，查看日志只需要查看软链接，免去了判断哪个文件才是当前最新的烦恼</li>
+  <li>代码量不多（我没有对比过其他日志库的源码），对应不同场景，可以尝试修改源码适配不同工程，如本人修改了文件的命名格式，以及新建日志文件的条件增加按天新建功能（则pid或者日期改变都将新建一个日志文件）</li>
+</ul>
+
+<h1 id="glog使用示例">Glog使用示例</h1>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;glog/logging.h&gt;
+</span><span class="kt">int</span> <span class="n">main</span><span class="p">(){</span>
+    <span class="n">google</span><span class="o">::</span><span class="n">InitGoogleLogging</span><span class="p">(</span><span class="s">"LogName"</span><span class="p">);</span>
+    <span class="n">google</span><span class="o">::</span><span class="n">SetLogDestination</span><span class="p">(</span><span class="n">google</span><span class="o">::</span><span class="n">INFO</span><span class="p">,</span> <span class="s">"/var/logs/LogName-"</span><span class="p">);</span>
+    <span class="n">google</span><span class="o">::</span><span class="n">SetLogDestination</span><span class="p">(</span><span class="n">google</span><span class="o">::</span><span class="n">WARNING</span><span class="p">,</span> <span class="s">"var/logs/LogName-"</span><span class="p">);</span>
+    <span class="n">google</span><span class="o">::</span><span class="n">SetLogDestination</span><span class="p">(</span><span class="n">google</span><span class="o">::</span><span class="n">ERROR</span><span class="p">,</span> <span class="s">"/var/logs/LogName-"</span><span class="p">);</span>
+    <span class="n">FLAGS_logbufsecs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">//缓冲日志输出，默认为30秒，此处改为立即输出</span>
+    <span class="n">FLAGS_stop_logging_if_full_disk</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span> <span class="c1">//当磁盘被写满时，停止日志输出</span>
+    <span class="n">FLAGS_minloglevel</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="c1">//INFO=0,WARNING=1,ERROR=2 </span>
+    <span class="n">LOG</span><span class="p">(</span><span class="n">INFO</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"Build time : "</span> <span class="o">&lt;&lt;</span> <span class="n">__DATE__</span> <span class="o">&lt;&lt;</span> <span class="s">" - "</span> <span class="o">&lt;&lt;</span> <span class="n">__TIME__</span><span class="p">;</span><span class="c1">//输出编译时间</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>大多数设置有默认值，而更多设置可以直接查看头文件：</p>
+<ul>
+  <li>搜索带”set”关键字的方法，如：SetLogDestination</li>
+  <li>搜索”DECLARE_“，可以找到一系列GFLAG变量，如最小输出等级的定义：<br />
+  DECLARE_int32(minloglevel);<br />
+  那么我们可以用以下语句来修改（也可以运行程序时带参数指定）：<br />
+  FLAGS_minloglevel = 0;</li>
+  <li>另外查看头文件也能发现很多其他应用，如有一系列结合断言的LOG宏（如LOG_ASSERT）等等，本人并未使用，比多做描述</li>
+</ul>
+
+<h1 id="根据需求定制自己的glog">根据需求定制自己的Glog</h1>
+<h2 id="例如本人工作上希望日志能按天区分每一个文件这样避免一个文件太大以及查错方便等等">例如，本人工作上希望日志能按天区分每一个文件，这样避免一个文件太大，以及查错方便等等。</h2>
+
+<p>首先我们可以简单浏览以下源码，新建日志文件主要是每次Write时判断以下条件<br />
+src\logging.cc : LogFileObject::Write</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">file_length_</span> <span class="o">&gt;&gt;</span> <span class="mi">20</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">MaxLogSize</span><span class="p">()</span> <span class="o">||</span>
+  <span class="n">PidHasChanged</span><span class="p">()</span> <span class="p">)</span>
+</code></pre></div></div>
+<p>src\utilities.cc : PidHasChanged</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">int32</span> <span class="n">g_main_thread_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">();</span>
+<span class="kt">bool</span> <span class="nf">PidHasChanged</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">int32</span> <span class="n">pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">g_main_thread_pid</span> <span class="o">==</span> <span class="n">pid</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">g_main_thread_pid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<hr />
+<h2 id="可见我们只需要仿照着写一个函数加入到条件判断即可符合我们的需求">可见，我们只需要仿照着写一个函数，加入到条件判断，即可符合我们的需求</h2>
+<p>src\logging.cc : LogFileObject::Write</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">file_length_</span> <span class="o">&gt;&gt;</span> <span class="mi">20</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">MaxLogSize</span><span class="p">()</span> <span class="o">||</span>
+  <span class="n">PidHasChanged</span><span class="p">()</span> <span class="o">||</span> <span class="n">DayHasChanged</span><span class="p">())</span>
+</code></pre></div></div>
+<p>src\utilities.cc : DayHasChanged</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">int32</span> <span class="n">g_main_day</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="nf">DayHasChanged</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">time_t</span> <span class="n">raw_time</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="n">tm</span> <span class="n">tm_info</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+  <span class="n">time</span><span class="p">(</span><span class="o">&amp;</span><span class="n">raw_time</span><span class="p">);</span>
+  <span class="n">localtime_r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">raw_time</span><span class="p">,</span><span class="o">&amp;</span><span class="n">tm_info</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">tm_info</span><span class="p">.</span><span class="n">tm_mday</span> <span class="o">==</span> <span class="n">g_main_day</span><span class="p">){</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">g_main_day</span> <span class="o">=</span> <span class="n">tm_info</span><span class="p">.</span><span class="n">tm_mday</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<hr />
+<h2 id="再有我当时觉得文件名时间去到了时分秒没必要反而因为文件名太长在显示上觉得不舒服">再有，我当时觉得文件名时间去到了时分秒没必要，反而因为文件名太长在显示上觉得不舒服</h2>
+<p>同样，不难发现还是在src\logging.cc : LogFileObject::Write方法中，新建文件时构造了文件名的格式，主要涉及以下变量<br />
+ostringstream time_pid_stream;
+找到了这个变量，接下来的几行代码，就可以随意修改成更适合当前工程上使用的版本了</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ostringstream</span> <span class="n">time_pid_stream</span><span class="p">;</span>
+<span class="n">time_pid_stream</span><span class="p">.</span><span class="n">fill</span><span class="p">(</span><span class="sc">'0'</span><span class="p">);</span>
+<span class="n">time_pid_stream</span> <span class="o">&lt;&lt;</span> <span class="mi">1900</span><span class="o">+</span><span class="n">tm_time</span><span class="p">.</span><span class="n">tm_year</span>
+                <span class="o">&lt;&lt;</span> <span class="n">setw</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="o">+</span><span class="n">tm_time</span><span class="p">.</span><span class="n">tm_mon</span>
+                <span class="o">&lt;&lt;</span> <span class="n">setw</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">tm_time</span><span class="p">.</span><span class="n">tm_mday</span>
+                <span class="cm">/****del by nycko for filename
+                &lt;&lt; '-'
+                &lt;&lt; setw(2) &lt;&lt; tm_time.tm_hour
+                &lt;&lt; setw(2) &lt;&lt; tm_time.tm_min
+                &lt;&lt; setw(2) &lt;&lt; tm_time.tm_sec
+                *****del by nycko for filename*/</span>
+                <span class="o">&lt;&lt;</span> <span class="sc">'-'</span>
+                <span class="o">&lt;&lt;</span> <span class="n">GetMainThreadPid</span><span class="p">()</span>
+                <span class="o">&lt;&lt;</span> <span class="s">".log"</span><span class="p">;</span>
+</code></pre></div></div>
+
+</div>
+
+<div>
+	
+	<div class="tbc"></div>
+	
+</div>
+
+<div class="share">
+    <p>Share this post with: </p>
+	<a href="https://twitter.com/intent/tweet?text=开源项目--Glog@&amp;url=http://localhost:4000/nycko-pages/c++/Glog.html" class="twitter-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4000/nycko-pages/c++/Glog.html" class="facebook-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+    
+	<a href="https://plus.google.com/share?url=http://localhost:4000/nycko-pages/c++/Glog.html" class="googleplus-share">
+		<span class="fa-stack fa-lg">
+			<i class="fa fa-circle fa-stack-2x"></i>
+			<i class="fa fa-google-plus fa-stack-1x fa-inverse"></i>
+		</span>
+	</a>
+</div>
+
+
+<div id="disqus_thread"></div>
+
+
+ 
+</div>
+
+
+</article>
+
+  </div>
+
+</body>
+
+<foot>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <center>
+        
+		<p><a class="link" href="/nycko-pages/archive/">Archive</a> /
+		<a class="link" href="/nycko-pages/category/">Category</a> / 
+		<a class="link" href="/nycko-pages/tags/">Tags</a> / 
+		<a class="link" href="/nycko-pages/about/">About</a> /
+		<a class="link" href="/nycko-pages/contact/">Contact</a>
+        </p>
+
+        <span><script>document.write(new Date().getFullYear());</script></span>
+        <span>&copy;</span>
+        
+		<a class="link" href="/nycko-pages">Nycko Blog</a>
+		<br>
+		<span>Theme &copy; <a class="link" href="https://gabriel-chen.github.io" target="_blank"> Gabriel</a> | </span>
+				<iframe
+			style="margin-left: 2px; margin-bottom:-5px;"
+			frameborder="0" scrolling="0" width="91px" height="20px"
+			src="https://ghbtns.com/github-btn.html?user=itisbenjamin&repo=Nice_Blog&type=star&count=true" >
+		</iframe>
+
+    </center>
+    
+  </div>
+
+</footer>
+
+    <foot>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Derictory -->
+
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script src="http://yandex.st/highlightjs/6.2/highlight.min.js"></script>
+
+<!-- Hit analytics -->
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<!-- Directory -->
+
+<script src="/nycko-pages/js/main.js"></script>
+
+</foot>
+
+
+</foot>
+
+</html>
